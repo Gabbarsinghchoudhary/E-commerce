@@ -1,14 +1,34 @@
-import { ArrowLeft, Heart, Users, Award, Target, Shield, Truck } from 'lucide-react';
+import { ArrowLeft, Heart, Users, Award, Target, Shield, Truck, Linkedin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const AboutUs = () => {
   const navigate = useNavigate();
 
   const founders = [
-    { name: 'Nahar Singh', role: 'Founder & CEO', position: 'Chief Executive Officer' },
-    { name: 'Gabbar Singh', role: 'Co-Founder & CMO', position: 'Chief Marketing Officer' },
-    { name: 'Kamal Singh', role: 'Co-Founder & COO', position: 'Chief Operations Officer' },
-    { name: 'Jatin Yadav', role: 'Co-Founder & CTO', position: 'Chief Technology Officer' },
+    { 
+      name: 'Nahar Singh', 
+      role: 'Founder & CEO', 
+      position: 'Chief Executive Officer',
+      linkedin: '#'
+    },
+    { 
+      name: 'Gabbar Singh', 
+      role: 'Co-Founder & CMO', 
+      position: 'Chief Marketing Officer',
+      linkedin: 'https://www.linkedin.com/in/gabbar-singh-244746216'
+    },
+    { 
+      name: 'Kamal Singh', 
+      role: 'Co-Founder & COO', 
+      position: 'Chief Operations Officer',
+      linkedin: '#'
+    },
+    { 
+      name: 'Jatin Yadav', 
+      role: 'Co-Founder & CTO', 
+      position: 'Chief Technology Officer',
+      linkedin: 'https://www.linkedin.com/in/jatin-yadav-43b8a1252'
+    },
   ];
 
   const features = [
@@ -127,7 +147,16 @@ export const AboutUs = () => {
                   </div>
                   <h3 className="text-lg font-semibold text-white mb-1">{founder.name}</h3>
                   <p className="text-cyan-400 text-sm font-medium mb-1">{founder.role}</p>
-                  <p className="text-gray-400 text-xs">{founder.position}</p>
+                  <p className="text-gray-400 text-xs mb-3">{founder.position}</p>
+                  <a
+                    href={founder.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center space-x-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors duration-300"
+                  >
+                    <Linkedin className="h-4 w-4" />
+                    <span>LinkedIn</span>
+                  </a>
                 </div>
               ))}
             </div>
