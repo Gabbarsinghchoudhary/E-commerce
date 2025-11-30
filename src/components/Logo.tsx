@@ -16,10 +16,10 @@ export const Logo: React.FC<{ className?: string }> = ({ className = '' }) => {
       
       {/* Brand name */}
       <div className="flex flex-col">
-        <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent tracking-tight">
+        <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent tracking-tight">
           DecorMitra
         </span>
-        <span className="text-xs text-gray-400 tracking-widest -mt-1">ILLUMINATE YOUR WORLD</span>
+        <span className="text-[10px] sm:text-xs text-gray-400 tracking-widest -mt-1">ILLUMINATE YOUR WORLD</span>
       </div>
     </div>
   );

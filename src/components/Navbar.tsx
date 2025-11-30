@@ -115,7 +115,7 @@ export const Navbar: React.FC = () => {
           
           {/* Logo */}
           <Link to="/" className="flex items-center group">
-            {isMobile ? <LogoIcon /> : <Logo />}
+            <Logo className={isMobile ? "scale-90" : ""} />
           </Link>
 
           {/* MOBILE VIEW */}
