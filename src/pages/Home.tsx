@@ -1,23 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Zap, Star, TrendingUp, Sparkles } from 'lucide-react';
+import { Zap, Star, TrendingUp, Sparkles, Shield, Truck, HeadphonesIcon, Award } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ProductCard } from '../components/ProductCard';
 import { productAPI, Product as APIProduct, handleAPIError } from '../services/api';
-
-// Convert backend Product to frontend Product format
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  images: string[];
-  category: string;
-  wattage: string;
-  lumens: number;
-  colorTemp: string;
-  lifespan: string;
-  inStock: boolean;
-}
+import { Product } from '../types';
 
 export const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -41,13 +27,19 @@ export const Home = () => {
         name: p.name,
         description: p.description,
         price: p.price,
+        discountedPrice: p.discountedPrice,
+        tax: p.tax,
         images: p.images,
         category: p.category,
         wattage: p.wattage,
         lumens: p.lumens,
         colorTemp: p.colorTemp,
         lifespan: p.lifespan,
+        specifications: p.specifications,
         inStock: p.inStock,
+        stock: (p as any).stock || 0,
+        averageRating: p.averageRating,
+        totalRatings: p.totalRatings,
       }));
       
       setProducts(convertedProducts);
@@ -143,6 +135,60 @@ export const Home = () => {
             )}
           </>
         )}
+
+        {/* Why Us Section */}
+        <div className="mt-20 mb-12">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent mb-4">
+              Why Choose Us?
+            </h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              We're committed to providing the best products and services to our customers
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-8 rounded-2xl border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/20 hover:-translate-y-2">
+              <div className="bg-cyan-500/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <Shield className="h-8 w-8 text-cyan-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Quality Guarantee</h3>
+              <p className="text-gray-400">
+                All products come with manufacturer warranty and quality assurance
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-8 rounded-2xl border border-blue-500/20 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/20 hover:-translate-y-2">
+              <div className="bg-blue-500/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <Truck className="h-8 w-8 text-blue-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Fast Delivery</h3>
+              <p className="text-gray-400">
+                Free shipping on all orders with quick and reliable delivery
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-8 rounded-2xl border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2">
+              <div className="bg-purple-500/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <HeadphonesIcon className="h-8 w-8 text-purple-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">24/7 Support</h3>
+              <p className="text-gray-400">
+                Our customer service team is always ready to help you
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-8 rounded-2xl border border-green-500/20 hover:border-green-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/20 hover:-translate-y-2">
+              <div className="bg-green-500/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <Award className="h-8 w-8 text-green-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Best Prices</h3>
+              <p className="text-gray-400">
+                Competitive pricing with regular discounts and special offers
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

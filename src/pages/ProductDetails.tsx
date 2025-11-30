@@ -1,26 +1,26 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ShoppingCart, ArrowLeft, Zap, Lightbulb, Clock, Thermometer, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Zap, Lightbulb, Clock, Thermometer, Star, ChevronLeft, ChevronRight, Share2, Package } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
-import { productAPI, handleAPIError } from '../services/api';
+import { productAPI, handleAPIError, Product as APIProduct } from '../services/api';
+import { Product } from '../types';
 import toast from 'react-hot-toast';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  images: string[];
-  category: string;
-  wattage: string;
-  lumens: number;
-  colorTemp: string;
-  lifespan: string;
-  inStock: boolean;
-}
+import { RatingComponent } from '../components/RatingComponent';
+import { ProductCard } from '../components/ProductCard';
 
 export const ProductDetails = () => {
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: product?.name,
+        text: product?.description,
+        url: window.location.href,
+      });
+    } else {
+      toast('Share not supported on this browser', { icon: 'ℹ️' });
+    }
+  };
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
@@ -28,6 +28,7 @@ export const ProductDetails = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     fetchProduct();
@@ -47,14 +48,45 @@ export const ProductDetails = () => {
           name: foundProduct.name,
           description: foundProduct.description,
           price: foundProduct.price,
+          discountedPrice: foundProduct.discountedPrice,
+          tax: foundProduct.tax,
           images: foundProduct.images,
           category: foundProduct.category,
           wattage: foundProduct.wattage,
           lumens: foundProduct.lumens,
           colorTemp: foundProduct.colorTemp,
           lifespan: foundProduct.lifespan,
+          specifications: foundProduct.specifications,
           inStock: foundProduct.inStock,
+          stock: (foundProduct as any).stock || 0,
+          averageRating: foundProduct.averageRating,
+          totalRatings: foundProduct.totalRatings,
         });
+
+        // Get recommended products (same category, exclude current product)
+        const recommended = response.products
+          .filter((p: APIProduct) => p._id !== id && p.category === foundProduct.category && p.inStock)
+          .slice(0, 4)
+          .map((p: APIProduct) => ({
+            id: p._id,
+            name: p.name,
+            description: p.description,
+            price: p.price,
+            discountedPrice: p.discountedPrice,
+            tax: p.tax || 10,
+            images: p.images,
+            category: p.category,
+            wattage: p.wattage,
+            lumens: p.lumens,
+            colorTemp: p.colorTemp,
+            lifespan: p.lifespan,
+            specifications: p.specifications || [],
+            inStock: p.inStock,
+            stock: (p as any).stock || 0,
+            averageRating: p.averageRating,
+            totalRatings: p.totalRatings,
+          }));
+        setRecommendedProducts(recommended);
       }
     } catch (err) {
       const errorMessage = handleAPIError(err);
@@ -96,6 +128,16 @@ export const ProductDetails = () => {
     }
     addToCart(product);
     navigate('/cart');
+  };
+
+  const handleBuyNow = () => {
+    if (!user) {
+      toast.error('Please login to buy now');
+      navigate('/login');
+      return;
+    }
+    // Optionally add to cart or pass product info to checkout
+    navigate('/checkout', { state: { product } });
   };
 
   const nextImage = () => {
@@ -229,6 +271,17 @@ export const ProductDetails = () => {
                     <p className="text-white font-semibold">{product.lifespan}</p>
                   </div>
                 </div>
+                {product.specifications && product.specifications.length > 0 && 
+                  product.specifications.map((spec, index) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <Package className="h-5 w-5 text-amber-400 mt-1" />
+                      <div>
+                        <p className="text-sm text-gray-400">{spec.key}</p>
+                        <p className="text-white font-semibold">{spec.value}</p>
+                      </div>
+                    </div>
+                  ))
+                }
               </div>
             </div>
 
@@ -236,9 +289,28 @@ export const ProductDetails = () => {
               <div className="flex items-end justify-between mb-6">
                 <div>
                   <p className="text-gray-400 text-sm mb-1">Price</p>
-                  <span className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                    ${product.price}
-                  </span>
+                  <div className="flex items-center space-x-4">
+                    {product.discountedPrice ? (
+                      <>
+                        <span className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                          Rs {product.discountedPrice}
+                        </span>
+                        <span className="text-2xl font-semibold text-gray-400 line-through">
+                          Rs {product.price}
+                        </span>
+                        <span className="text-lg font-semibold text-green-400">
+                          {Math.round(((product.price - product.discountedPrice) / product.price) * 100)}% OFF
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                        Rs {product.price}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-400 mt-2">
+                    (Inclusive of {product.tax}% tax)
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className={`text-sm font-semibold ${product.inStock ? 'text-green-400' : 'text-red-400'}`}>
@@ -253,18 +325,36 @@ export const ProductDetails = () => {
                   <span className="text-lg">Admin View - Purchase Disabled</span>
                 </div>
               ) : (
-                <button
-                  onClick={handleAddToCart}
-                  disabled={!product.inStock}
-                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-4 rounded-xl flex items-center justify-center space-x-3 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                  <ShoppingCart className="h-6 w-6" />
-                  <span className="text-lg">Add to Cart</span>
-                </button>
+                <>
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={!product.inStock}
+                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-4 rounded-xl flex items-center justify-center space-x-3 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    <ShoppingCart className="h-6 w-6" />
+                    <span className="text-lg">Add to Cart</span>
+                  </button>
+                  <button
+                    onClick={handleBuyNow}
+                    disabled={!product.inStock}
+                    className="w-full mt-4 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-4 rounded-xl flex items-center justify-center space-x-3 transition-all duration-300 hover:shadow-lg hover:shadow-pink-500/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    <span className="text-lg">Buy Now</span>
+                  </button>
+                </>
               )}
             </div>
 
             <div className="bg-slate-800/30 backdrop-blur-xl rounded-2xl border border-cyan-500/10 p-6">
+                          <div className="flex justify-end mt-6">
+                            <button
+                              onClick={handleShare}
+                              className="flex items-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/50"
+                            >
+                              <Share2 className="h-5 w-5" />
+                              <span>Share Product</span>
+                            </button>
+                          </div>
               <h3 className="text-lg font-semibold text-white mb-3">Features</h3>
               <ul className="space-y-2">
                 <li className="flex items-center space-x-2 text-gray-300">
@@ -287,6 +377,25 @@ export const ProductDetails = () => {
             </div>
           </div>
         </div>
+
+        {/* Rating Section */}
+        <div className="mt-12">
+          <RatingComponent productId={id!} />
+        </div>
+
+        {/* Recommended Products */}
+        {recommendedProducts.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-3xl font-bold text-white mb-6">
+              Recommended <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">For You</span>
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {recommendedProducts.map((recProduct) => (
+                <ProductCard key={recProduct.id} product={recProduct} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -56,13 +56,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           name: item.product.name,
           description: item.product.description,
           price: item.product.price,
+          discountedPrice: item.product.discountedPrice,
+          tax: item.product.tax || 10,
           images: item.product.images,
           category: item.product.category,
           wattage: item.product.wattage,
           lumens: item.product.lumens,
           colorTemp: item.product.colorTemp,
           lifespan: item.product.lifespan,
+          specifications: item.product.specifications || [],
           inStock: item.product.inStock,
+          averageRating: item.product.averageRating,
+          totalRatings: item.product.totalRatings,
           quantity: item.quantity,
         }));
         setCart(transformedCart);
@@ -156,7 +161,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    return cart.reduce((total, item) => {
+      const itemPrice = (item as any).discountedPrice || item.price;
+      return total + itemPrice * item.quantity;
+    }, 0);
   };
 
   const getTotalItems = () => {

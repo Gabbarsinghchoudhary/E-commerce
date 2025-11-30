@@ -49,13 +49,19 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  discountedPrice?: number;
+  tax: number;
   images: string[];
   category: string;
   wattage: string;
   lumens: number;
   colorTemp: string;
   lifespan: string;
+  specifications: Array<{ key: string; value: string }>;
   inStock: boolean;
+  stock: number;
+  averageRating?: number;
+  totalRatings?: number;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -284,6 +290,38 @@ export const contactAPI = {
 
   getAllMessages: async () => {
     const response = await api.get('/admin/contact/messages');
+    return response.data;
+  },
+};
+
+// ============ Rating APIs ============
+export interface Rating {
+  _id: string;
+  product: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  rating: number;
+  review?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const ratingAPI = {
+  submitRating: async (ratingData: { productId: string; rating: number; review?: string }) => {
+    const response = await api.post('/ratings/submit', ratingData);
+    return response.data;
+  },
+
+  getProductRatings: async (productId: string): Promise<{ ratings: Rating[]; averageRating: number; totalRatings: number }> => {
+    const response = await api.get(`/ratings/product/${productId}`);
+    return response.data;
+  },
+
+  getUserRating: async (productId: string): Promise<{ rating: Rating | null }> => {
+    const response = await api.get(`/ratings/user/${productId}`);
     return response.data;
   },
 };

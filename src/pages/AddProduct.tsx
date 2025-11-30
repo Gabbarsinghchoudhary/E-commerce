@@ -9,12 +9,16 @@ interface ProductForm {
   name: string;
   description: string;
   price: number;
+  discountedPrice: number;
+  tax: number;
   images: string[];
   category: string;
   wattage: string;
   lumens: number;
   colorTemp: string;
   lifespan: string;
+  specifications: { key: string; value: string }[];
+  stock: number;
 }
 
 export const AddProduct = () => {
@@ -27,12 +31,16 @@ export const AddProduct = () => {
     name: '',
     description: '',
     price: 0,
+    discountedPrice: 0,
+    tax: 10,
     images: [],
     category: '',
     wattage: '',
     lumens: 0,
     colorTemp: '',
     lifespan: '',
+    specifications: [],
+    stock: 0,
   });
 
   // Redirect if not admin
@@ -63,13 +71,17 @@ export const AddProduct = () => {
         name: formData.name,
         description: formData.description,
         price: formData.price,
+        discountedPrice: formData.discountedPrice || undefined,
+        tax: formData.tax,
         images: formData.images,
         category: formData.category,
         wattage: formData.wattage,
         lumens: formData.lumens,
         colorTemp: formData.colorTemp,
         lifespan: formData.lifespan,
+        specifications: formData.specifications,
         inStock: true,
+        stock: formData.stock || 0,
       });
       
       // Clear form on success
@@ -77,12 +89,16 @@ export const AddProduct = () => {
         name: '',
         description: '',
         price: 0,
+        discountedPrice: 0,
+        tax: 10,
         images: [],
         category: '',
         wattage: '',
         lumens: 0,
         colorTemp: '',
         lifespan: '',
+        specifications: [],
+        stock: 0,
       });
 
       toast.success('Product added successfully!');
@@ -105,7 +121,7 @@ export const AddProduct = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'price' || name === 'lumens' ? parseFloat(value) || 0 : value,
+      [name]: name === 'price' || name === 'discountedPrice' || name === 'tax' || name === 'lumens' || name === 'stock' ? parseFloat(value) || 0 : value,
     }));
   };
 
@@ -163,6 +179,29 @@ export const AddProduct = () => {
     fileInputRef.current?.click();
   };
 
+  const handleAddSpecification = () => {
+    setFormData(prev => ({
+      ...prev,
+      specifications: [...prev.specifications, { key: '', value: '' }],
+    }));
+  };
+
+  const handleSpecificationChange = (index: number, field: 'key' | 'value', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      specifications: prev.specifications.map((spec, i) =>
+        i === index ? { ...spec, [field]: value } : spec
+      ),
+    }));
+  };
+
+  const handleRemoveSpecification = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      specifications: prev.specifications.filter((_, i) => i !== index),
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-20 pb-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -201,7 +240,7 @@ export const AddProduct = () => {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">
-                  Price ($)
+                  Price (Rs)
                 </label>
                 <input
                   type="number"
@@ -210,6 +249,38 @@ export const AddProduct = () => {
                   onChange={handleChange}
                   required
                   min="0"
+                  step="0.01"
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Discounted Price (Rs) - Optional
+                </label>
+                <input
+                  type="number"
+                  name="discountedPrice"
+                  value={formData.discountedPrice}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Tax (%)
+                </label>
+                <input
+                  type="number"
+                  name="tax"
+                  value={formData.tax}
+                  onChange={handleChange}
+                  required
+                  min="0"
+                  max="100"
                   step="0.01"
                   className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                 />
@@ -396,7 +467,74 @@ export const AddProduct = () => {
                   placeholder="e.g., 25000 hours"
                 />
               </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Stock Quantity
+                </label>
+                <input
+                  type="number"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  required
+                  min="0"
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                  placeholder="Enter available quantity"
+                />
+              </div>
             </div>
+          </div>
+
+          {/* Additional Specifications Section */}
+          <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-cyan-500/20 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-white">
+                Additional Specifications
+              </h2>
+              <button
+                type="button"
+                onClick={handleAddSpecification}
+                className="flex items-center space-x-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add Specification</span>
+              </button>
+            </div>
+
+            {formData.specifications.length === 0 ? (
+              <p className="text-gray-400 text-center py-4">
+                No additional specifications yet. Click "Add Specification" to add some.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {formData.specifications.map((spec, index) => (
+                  <div key={index} className="flex gap-4 items-start">
+                    <input
+                      type="text"
+                      value={spec.key}
+                      onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)}
+                      placeholder="Specification name (e.g., Warranty)"
+                      className="flex-1 px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                    />
+                    <input
+                      type="text"
+                      value={spec.value}
+                      onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
+                      placeholder="Value (e.g., 2 years)"
+                      className="flex-1 px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSpecification(index)}
+                      className="p-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end space-x-4">

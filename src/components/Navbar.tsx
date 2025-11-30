@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart,
   User,
-  Lightbulb,
   LogOut,
   ChevronDown,
   Package,
@@ -13,10 +12,12 @@ import {
   PlusCircle,
   Layers,
   Mail,
+  Users,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useMediaQuery } from 'react-responsive';
+import { Logo, LogoIcon } from './Logo';
 
 export const Navbar: React.FC = () => {
   const { getTotalItems } = useCart();
@@ -58,6 +59,17 @@ export const Navbar: React.FC = () => {
         >
           <Shield className="h-4 w-4" />
           <span>Manage Admins</span>
+        </Link>
+        <Link
+          to="/manage-users"
+          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-300 hover:bg-slate-700 hover:text-cyan-400"
+          onClick={() => {
+            setIsDropdownOpen(false);
+            if (mobile) setIsHamburgerOpen(false);
+          }}
+        >
+          <Users className="h-4 w-4" />
+          <span>View Users</span>
         </Link>
         <Link
           to="/manage-messages"
@@ -102,14 +114,8 @@ export const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <div className="relative">
-              <Lightbulb className="h-8 w-8 text-cyan-400 animate-pulse" />
-              <div className="absolute inset-0 h-8 w-8 text-cyan-400 blur-xl opacity-50 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-              LumiTech
-            </span>
+          <Link to="/" className="flex items-center group">
+            {isMobile ? <LogoIcon /> : <Logo />}
           </Link>
 
           {/* MOBILE VIEW */}

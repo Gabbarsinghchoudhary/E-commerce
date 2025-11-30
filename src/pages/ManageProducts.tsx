@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Eye, Package, AlertTriangle } from 'lucide-react';
+import { Trash2, Eye, Package, AlertTriangle, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { productAPI, Product as APIProduct, handleAPIError } from '../services/api';
@@ -14,6 +14,7 @@ interface Product {
   images: string[];
   category: string;
   inStock: boolean;
+  stock: number;
 }
 
 export const ManageProducts = () => {
@@ -22,6 +23,8 @@ export const ManageProducts = () => {
   const [productList, setProductList] = useState<Product[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editingStock, setEditingStock] = useState<string | null>(null);
+  const [stockValue, setStockValue] = useState<number>(0);
 
   // Redirect if not admin
   if (!user || !user.isAdmin) {
@@ -47,6 +50,7 @@ export const ManageProducts = () => {
         images: p.images,
         category: p.category,
         inStock: p.inStock,
+        stock: (p as any).stock || 0,
       }));
       
       setProductList(convertedProducts);
@@ -75,6 +79,42 @@ export const ManageProducts = () => {
 
   const handleView = (productId: string) => {
     navigate(`/product/${productId}`);
+  };
+
+  const handleUpdateStock = async (productId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/admin/products/${productId}/stock`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ stock: stockValue }),
+      });
+
+      if (response.ok) {
+        setProductList(prev =>
+          prev.map(p =>
+            p.id === productId
+              ? { ...p, stock: stockValue, inStock: stockValue > 0 }
+              : p
+          )
+        );
+        setEditingStock(null);
+        toast.success('Stock updated successfully!');
+      } else {
+        toast.error('Failed to update stock');
+      }
+    } catch (err) {
+      console.error('Error updating stock:', err);
+      toast.error('Failed to update stock');
+    }
+  };
+
+  const startEditingStock = (productId: string, currentStock: number) => {
+    setEditingStock(productId);
+    setStockValue(currentStock);
   };
 
   return (
@@ -122,14 +162,61 @@ export const ManageProducts = () => {
                   <p className="text-gray-400 text-sm mb-4 line-clamp-2">{product.description}</p>
 
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-bold text-cyan-400">${product.price}</span>
-                    <span
-                      className={`text-sm font-semibold ${
-                        product.inStock ? 'text-green-400' : 'text-red-400'
-                      }`}
-                    >
-                      {product.inStock ? 'In Stock' : 'Out of Stock'}
-                    </span>
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl font-bold text-cyan-400">Rs {product.price}</span>
+                      <span className="text-lg font-semibold text-gray-400 line-through">Rs {Math.round(product.price * 1.2)}</span>
+                    </div>
+                  </div>
+
+                  {/* Stock Section */}
+                  <div className="mb-4 p-3 bg-slate-900/50 rounded-lg">
+                    {editingStock === product.id ? (
+                      <div className="space-y-2">
+                        <label className="text-sm text-gray-400">Update Stock</label>
+                        <div className="flex space-x-2">
+                          <input
+                            type="number"
+                            min="0"
+                            value={stockValue}
+                            onChange={(e) => setStockValue(parseInt(e.target.value) || 0)}
+                            className="flex-1 px-3 py-2 bg-slate-800 border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                          />
+                          <button
+                            onClick={() => handleUpdateStock(product.id)}
+                            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingStock(null)}
+                            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-400">Stock</p>
+                          <p className="text-lg font-bold text-white">{product.stock} units</p>
+                          <span
+                            className={`text-sm font-semibold ${
+                              product.inStock ? 'text-green-400' : 'text-red-400'
+                            }`}
+                          >
+                            {product.inStock ? 'In Stock' : 'Out of Stock'}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => startEditingStock(product.id, product.stock)}
+                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                          title="Edit Stock"
+                        >
+                          <Edit className="h-4 w-4 text-cyan-400" />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex space-x-2">

@@ -28,6 +28,13 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     navigate(`/product/${product.id}`);
   };
 
+  // Calculate display price and original price
+  const displayPrice = product.discountedPrice || product.price;
+  const hasDiscount = product.discountedPrice && product.discountedPrice < product.price;
+  const discountPercentage = hasDiscount 
+    ? Math.round(((product.price - product.discountedPrice!) / product.price) * 100)
+    : 0;
+
   return (
     <div
       className="group relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-cyan-500/20 hover:-translate-y-2 cursor-pointer"
@@ -71,14 +78,30 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           {product.description}
         </p>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-              ${product.price}
-            </span>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col">
+            <div className="flex items-center space-x-2 flex-wrap">
+              <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                Rs {displayPrice}
+              </span>
+              {hasDiscount && (
+                <>
+                  <span className="text-base font-semibold text-gray-400 line-through">
+                    Rs {product.price}
+                  </span>
+                  <span className="text-xs font-bold text-green-400 bg-green-500/20 px-2 py-1 rounded">
+                    {discountPercentage}% OFF
+                  </span>
+                </>
+              )}
+            </div>
+            {product.tax && (
+              <span className="text-xs text-gray-500 mt-1">+ {product.tax}% tax</span>
+            )}
           </div>
 
-          {user && isAdmin(user.email) ? (
+          <div className="flex justify-end">
+            {user && isAdmin(user.email) ? (
             <button
               onClick={handleViewDetails}
               className="bg-slate-700 hover:bg-slate-600 text-gray-300 px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-300"
@@ -94,7 +117,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               <ShoppingCart className="h-4 w-4" />
               <span className="text-sm font-semibold">Add</span>
             </button>
-          )}
+            )}
+          </div>
         </div>
 
         {!product.inStock && (

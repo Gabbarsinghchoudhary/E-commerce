@@ -14,6 +14,20 @@ export const Checkout = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [orderId, setOrderId] = useState('');
 
+  // Calculate total tax based on each product's tax rate
+  const getTotalTax = () => {
+    return cart.reduce((total, item) => {
+      const itemPrice = (item as any).discountedPrice || item.price;
+      const itemTax = (item as any).tax || 10;
+      return total + (itemPrice * item.quantity * itemTax / 100);
+    }, 0);
+  };
+
+  // Calculate grand total with tax
+  const getGrandTotal = () => {
+    return getTotalPrice() + getTotalTax();
+  };
+
   useEffect(() => {
     if (!user) {
       navigate('/login', { state: { from: '/checkout' } });
@@ -48,7 +62,7 @@ export const Checkout = () => {
         items: cart.map(item => ({
           product: item.id,
           productName: item.name,
-          productPrice: item.price,
+          productPrice: (item as any).discountedPrice || item.price,
           quantity: item.quantity,
         })),
         shippingAddress: {
@@ -303,13 +317,22 @@ export const Checkout = () => {
 
               <div className="space-y-3 mb-6">
                 {cart.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span className="text-gray-300">
-                      {item.name} x {item.quantity}
-                    </span>
-                    <span className="text-white font-semibold">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </span>
+                  <div key={item.id} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-300">
+                        {item.name} x {item.quantity}
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-white font-semibold">
+                          Rs {(((item as any).discountedPrice || item.price) * item.quantity).toFixed(2)}
+                        </span>
+                        {(item as any).discountedPrice && (item as any).discountedPrice < item.price && (
+                          <span className="text-gray-400 text-xs line-through">
+                            Rs {(item.price * item.quantity).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -317,11 +340,11 @@ export const Checkout = () => {
               <div className="border-t border-cyan-500/20 pt-4 space-y-2">
                 <div className="flex justify-between text-gray-300">
                   <span>Subtotal</span>
-                  <span>${getTotalPrice().toFixed(2)}</span>
+                  <span>Rs {getTotalPrice().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">
-                  <span>Tax</span>
-                  <span>${(getTotalPrice() * 0.1).toFixed(2)}</span>
+                  <span>Tax (GST)</span>
+                  <span>Rs {getTotalTax().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">
                   <span>Shipping</span>
@@ -331,7 +354,7 @@ export const Checkout = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-white">Total</span>
                     <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                      ${(getTotalPrice() * 1.1).toFixed(2)}
+                      Rs {getGrandTotal().toFixed(2)}
                     </span>
                   </div>
                 </div>

@@ -31,6 +31,11 @@ export const Footer = () => {
                   Track Order
                 </Link>
               </li>
+              <li>
+                <Link to="/contact" className="hover:text-cyan-400 transition-colors">
+                  Contact Us
+                </Link>
+              </li>
             </ul>
           </div>
           
@@ -39,15 +44,15 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-cyan-400" />
-                <span>123 Commerce St, NY 10001</span>
+                <span> Barodameo Alwar, RJ 301021</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-cyan-400" />
-                <span>+1 (555) 123-4567</span>
+                <span>+91 97-8596-7653</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-cyan-400" />
-                <span>support@ecommerce.com</span>
+                <span>decormitra11@gmail.com</span>
               </li>
             </ul>
           </div>
@@ -55,21 +60,65 @@ export const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Follow Us</h3>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-300 hover:text-cyan-400 transition-colors">
+              <a
+                href="https://www.facebook.com/profile.php?id=100091545564519&rdid=LBkC6V5CCyZG9U3T&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F17St9zJX4r%2F#" // Replace with your actual Facebook page
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-cyan-400 transition-colors"
+              >
                 <Facebook className="h-6 w-6" />
               </a>
-              <a href="#" className="text-gray-300 hover:text-cyan-400 transition-colors">
+              <a
+                href="#" // Replace with your actual Twitter page
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-cyan-400 transition-colors"
+              >
                 <Twitter className="h-6 w-6" />
               </a>
-              <a href="#" className="text-gray-300 hover:text-cyan-400 transition-colors">
+              <a
+                href="https://www.instagram.com/decormitra.shop?igsh=MTVwenUxbDJrcjFoYQ==" // Replace with your actual Instagram page
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-cyan-400 transition-colors"
+              >
                 <Instagram className="h-6 w-6" />
               </a>
             </div>
           </div>
         </div>
         
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} Your E-commerce. All rights reserved.</p>
+        <div className="border-t border-gray-800 mt-8 pt-8">
+          <div className="flex flex-wrap justify-center gap-4 mb-4 text-sm">
+            <Link to="/about" className="hover:text-cyan-400 transition-colors">
+              About Us
+            </Link>
+            <span className="text-gray-600">|</span>
+            <Link to="/terms" className="hover:text-cyan-400 transition-colors">
+              Terms & Conditions
+            </Link>
+            <span className="text-gray-600">|</span>
+            <Link to="/privacy" className="hover:text-cyan-400 transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="text-gray-600">|</span>
+            <Link to="/return-policy" className="hover:text-cyan-400 transition-colors">
+              Return & Refund Policy
+            </Link>
+            <span className="text-gray-600">|</span>
+            <Link to="/shipping" className="hover:text-cyan-400 transition-colors">
+              Shipping Policy
+            </Link>
+            <span className="text-gray-600">|</span>
+            <Link to="/faqs" className="hover:text-cyan-400 transition-colors">
+              FAQs
+            </Link>
+            <span className="text-gray-600">|</span>
+            <Link to="/cancel-order" className="hover:text-cyan-400 transition-colors">
+              Cancel Order
+            </Link>
+          </div>
+          <p className="text-center text-sm">&copy; {new Date().getFullYear()} DecorMitra. All rights reserved.</p>
         </div>
       </div>
     </footer>
