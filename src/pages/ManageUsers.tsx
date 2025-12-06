@@ -3,24 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Users, Mail, Phone, MapPin, Calendar, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useAdmin } from '../context/AdminContext';
+import { adminAPI, type AdminUser } from '../services/api';
 import toast from 'react-hot-toast';
-
-interface User {
-  _id: string;
-  email: string;
-  name?: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  zipCode?: string;
-  createdAt: string;
-}
 
 export const ManageUsers = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isAdmin } = useAdmin();
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -42,19 +32,8 @@ export const ManageUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/admin/users', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.users || []);
-      } else {
-        toast.error('Failed to fetch users');
-      }
+      const data = await adminAPI.getAllUsers();
+      setUsers(data.users || []);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Failed to fetch users');

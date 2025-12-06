@@ -195,9 +195,23 @@ export const TrackOrder = () => {
                         <div className="text-sm text-gray-400 space-y-1">
                           <p>Customer: {order.shippingAddress.fullName}</p>
                           <p>Email: {order.shippingAddress.email}</p>
+                          {order.shippingAddress.phone && <p>Phone: {order.shippingAddress.phone}</p>}
                           <p>Address: {order.shippingAddress.address}, {order.shippingAddress.city}, {order.shippingAddress.zipCode}</p>
-                          <p>Items: {order.items.length}</p>
-                          <p>Total: ${order.totalAmount.toFixed(2)}</p>
+                          
+                          {/* Display Order Items */}
+                          <div className="mt-3 pt-3 border-t border-cyan-500/10">
+                            <p className="font-semibold text-gray-300 mb-2">Order Items:</p>
+                            {order.items.map((item, idx) => (
+                              <div key={idx} className="flex justify-between py-1">
+                                <span>{item.productName} x {item.quantity}</span>
+                                <span className="text-cyan-400">₹{(item.productPrice * item.quantity).toFixed(2)}</span>
+                              </div>
+                            ))}
+                            <div className="flex justify-between pt-2 mt-2 border-t border-cyan-500/10 font-semibold text-white">
+                              <span>Total Amount:</span>
+                              <span className="text-cyan-400">₹{order.totalAmount.toFixed(2)}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -534,9 +548,16 @@ export const TrackOrder = () => {
                       {order.status}
                     </span>
                   </div>
-                  <p className="text-gray-400 text-sm">
-                    ${order.totalAmount.toFixed(2)} • {order.items.length} item(s)
-                  </p>
+                  <div className="space-y-1">
+                    {order.items.map((item, idx) => (
+                      <p key={idx} className="text-gray-400 text-xs">
+                        {item.productName} x {item.quantity} - ₹{(item.productPrice * item.quantity).toFixed(2)}
+                      </p>
+                    ))}
+                    <p className="text-sm font-semibold text-cyan-400 pt-2 border-t border-cyan-500/10">
+                      Total: ₹{order.totalAmount.toFixed(2)}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>

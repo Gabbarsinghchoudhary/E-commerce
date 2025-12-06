@@ -102,12 +102,12 @@ export const Cart = () => {
                       <div className="text-right">
                         <div className="flex items-center justify-end space-x-2 mb-1">
                           <p className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                            Rs {(((item as any).discountedPrice || item.price) * item.quantity).toFixed(2)}
+                            ₹ {(((item as any).discountedPrice || item.price) * item.quantity).toFixed(2)}
                           </p>
                           {(item as any).discountedPrice && (item as any).discountedPrice < item.price && (
                             <>
                               <p className="text-lg font-semibold text-gray-400 line-through">
-                                Rs {(item.price * item.quantity).toFixed(2)}
+                                ₹ {(item.price * item.quantity).toFixed(2)}
                               </p>
                               <span className="text-xs font-bold text-green-400 bg-green-500/20 px-2 py-1 rounded">
                                 {Math.round(((item.price - (item as any).discountedPrice) / item.price) * 100)}% OFF
@@ -116,9 +116,9 @@ export const Cart = () => {
                           )}
                         </div>
                         <p className="text-sm text-gray-400">
-                          Rs {(item as any).discountedPrice || item.price} each
+                          ₹ {(item as any).discountedPrice || item.price} each
                           {(item as any).discountedPrice && (item as any).discountedPrice < item.price && (
-                            <span className="line-through ml-2">Rs {item.price}</span>
+                            <span className="line-through ml-2">₹ {item.price}</span>
                           )}
                           {(item as any).tax && <span className="ml-2 text-gray-500">(+{(item as any).tax}% tax)</span>}
                         </p>
@@ -137,7 +137,7 @@ export const Cart = () => {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-gray-300">
                   <span>Subtotal</span>
-                  <span>Rs {getTotalPrice().toFixed(2)}</span>
+                  <span>₹ {getTotalPrice().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">
                   <span>Shipping</span>
@@ -145,13 +145,13 @@ export const Cart = () => {
                 </div>
                 <div className="flex justify-between text-gray-300">
                   <span>Tax (GST)</span>
-                  <span>Rs {getTotalTax().toFixed(2)}</span>
+                  <span>₹ {getTotalTax().toFixed(2)}</span>
                 </div>
                 <div className="border-t border-cyan-500/20 pt-4">
                   <div className="flex justify-between items-center">
                     <span className="text-xl font-bold text-white">Total</span>
                     <span className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                      Rs {getGrandTotal().toFixed(2)}
+                      ₹ {getGrandTotal().toFixed(2)}
                     </span>
                   </div>
                 </div>

@@ -95,6 +95,7 @@ export interface Order {
   shippingAddress: {
     fullName: string;
     email: string;
+    phone: string;
     address: string;
     city: string;
     zipCode: string;
@@ -126,6 +127,17 @@ export interface Admin {
   dateAdded: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface AdminUser {
+  _id: string;
+  email: string;
+  name?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  zipCode?: string;
+  createdAt: string;
 }
 
 // ============ Auth APIs ============
@@ -217,7 +229,9 @@ export const orderAPI = {
   createOrder: async (orderData: {
     items: OrderItem[];
     shippingAddress: Order['shippingAddress'];
-    paymentInfo: Order['paymentInfo'];
+    paymentInfo?: any;
+    razorpayPaymentId?: string;
+    razorpayOrderId?: string;
   }) => {
     const response = await api.post('/orders', orderData);
     return response.data;
@@ -279,6 +293,11 @@ export const adminAPI = {
     const response = await api.delete(`/admin/admins/${email}`);
     return response.data;
   },
+
+  getAllUsers: async (): Promise<{ users: AdminUser[] }> => {
+    const response = await api.get('/admin/users');
+    return response.data;
+  },
 };
 
 // ============ Contact APIs ============
@@ -322,6 +341,24 @@ export const ratingAPI = {
 
   getUserRating: async (productId: string): Promise<{ rating: Rating | null }> => {
     const response = await api.get(`/ratings/user/${productId}`);
+    return response.data;
+  },
+};
+
+// ============ Payment APIs ============
+export const paymentAPI = {
+  getRazorpayKey: async (): Promise<{ keyId: string }> => {
+    const response = await api.get('/payment/key');
+    return response.data;
+  },
+
+  createRazorpayOrder: async (amount: number): Promise<{ orderId: string; amount: number; currency: string; keyId: string }> => {
+    const response = await api.post('/payment/create-order', { amount });
+    return response.data;
+  },
+
+  verifyPayment: async (paymentData: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+    const response = await api.post('/payment/verify', paymentData);
     return response.data;
   },
 };

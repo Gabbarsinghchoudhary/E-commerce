@@ -1,31 +1,55 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CreditCard, Lock, CheckCircle, ArrowLeft } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Lock, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { orderAPI } from '../services/api';
+import { orderAPI, paymentAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import { Product } from '../types';
+
+// Extend Window interface to include Razorpay
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export const Checkout = () => {
   const navigate = useNavigate();
-  const { cart, getTotalPrice, loadCart } = useCart();
+  const location = useLocation();
+  const { cart, loadCart } = useCart();
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [orderId, setOrderId] = useState('');
+  
+  // Handle Buy Now - single product checkout
+  const buyNowProduct = location.state?.product as Product | undefined;
+  const isBuyNow = !!buyNowProduct;
+  
+  // Use buyNow product or cart items
+  const checkoutItems = isBuyNow && buyNowProduct ? [{ ...buyNowProduct, quantity: 1 }] : cart;
 
   // Calculate total tax based on each product's tax rate
   const getTotalTax = () => {
-    return cart.reduce((total, item) => {
+    return checkoutItems.reduce((total, item) => {
       const itemPrice = (item as any).discountedPrice || item.price;
       const itemTax = (item as any).tax || 10;
       return total + (itemPrice * item.quantity * itemTax / 100);
     }, 0);
   };
 
+  // Calculate total price
+  const getTotalPriceForCheckout = () => {
+    return checkoutItems.reduce((total, item) => {
+      const itemPrice = (item as any).discountedPrice || item.price;
+      return total + (itemPrice * item.quantity);
+    }, 0);
+  };
+
   // Calculate grand total with tax
   const getGrandTotal = () => {
-    return getTotalPrice() + getTotalTax();
+    return getTotalPriceForCheckout() + getTotalTax();
   };
 
   useEffect(() => {
@@ -37,12 +61,10 @@ export const Checkout = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    phone: '',
     address: '',
     city: '',
     zipCode: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,45 +79,91 @@ export const Checkout = () => {
     setIsProcessing(true);
 
     try {
-      // Prepare order data
-      const orderData = {
-        items: cart.map(item => ({
-          product: item.id,
-          productName: item.name,
-          productPrice: (item as any).discountedPrice || item.price,
-          quantity: item.quantity,
-        })),
-        shippingAddress: {
-          fullName: formData.fullName,
+      const grandTotal = getGrandTotal();
+      
+      // Create Razorpay order
+      const paymentOrderResponse = await paymentAPI.createRazorpayOrder(grandTotal);
+      
+      // Initialize Razorpay checkout
+      const options = {
+        key: paymentOrderResponse.keyId,
+        amount: paymentOrderResponse.amount,
+        currency: paymentOrderResponse.currency,
+        name: 'DecorMitra',
+        description: 'Order Payment',
+        order_id: paymentOrderResponse.orderId,
+        handler: async function (response: any) {
+          try {
+            // Verify payment
+            await paymentAPI.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+
+            // Create order after successful payment
+            const orderData = {
+              items: checkoutItems.map(item => ({
+                product: item.id,
+                productName: item.name,
+                productPrice: (item as any).discountedPrice || item.price,
+                quantity: item.quantity,
+              })),
+              shippingAddress: {
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                zipCode: formData.zipCode,
+              },
+              paymentInfo: {},
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+            };
+
+            const orderResponse = await orderAPI.createOrder(orderData);
+            
+            setIsComplete(true);
+            setOrderId(orderResponse.order.orderId);
+            
+            // Reload cart to reflect cleared items (only if not buy now)
+            if (!isBuyNow) {
+              await loadCart();
+            }
+
+            setTimeout(() => {
+              navigate('/track-order');
+            }, 3000);
+          } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Failed to place order');
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: formData.fullName,
           email: formData.email,
-          address: formData.address,
-          city: formData.city,
-          zipCode: formData.zipCode,
         },
-        paymentInfo: {
-          cardNumber: formData.cardNumber,
-          cardLastFour: formData.cardNumber.slice(-4),
+        theme: {
+          color: '#06b6d4',
         },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false);
+            toast.error('Payment cancelled');
+          }
+        }
       };
 
-      const response = await orderAPI.createOrder(orderData);
-      
-      setIsComplete(true);
-      setOrderId(response.order.orderId);
-      
-      // Reload cart to reflect cleared items
-      await loadCart();
-
-      setTimeout(() => {
-        navigate('/track-order');
-      }, 3000);
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to place order');
+      toast.error(error.response?.data?.message || 'Failed to initialize payment');
       setIsProcessing(false);
     }
   };
 
-  if (cart.length === 0 && !isComplete) {
+  if (checkoutItems.length === 0 && !isComplete && !isBuyNow) {
     navigate('/cart');
     return null;
   }
@@ -184,7 +252,23 @@ export const Checkout = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Address
+                      Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      pattern="[0-9]{10}"
+                      className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                      placeholder="9876543210"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Full Address *
                     </label>
                     <input
                       type="text"
@@ -233,61 +317,17 @@ export const Checkout = () => {
 
               <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-cyan-500/20 p-6">
                 <div className="flex items-center space-x-2 mb-4">
-                  <CreditCard className="h-6 w-6 text-cyan-400" />
-                  <h2 className="text-xl font-bold text-white">Payment Information</h2>
-                  <Lock className="h-5 w-5 text-green-400 ml-auto" />
+                  <Lock className="h-6 w-6 text-cyan-400" />
+                  <h2 className="text-xl font-bold text-white">Payment Method</h2>
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Card Number
-                    </label>
-                    <input
-                      type="text"
-                      name="cardNumber"
-                      value={formData.cardNumber}
-                      onChange={handleInputChange}
-                      required
-                      maxLength={19}
-                      className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                      placeholder="1234 5678 9012 3456"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Expiry Date
-                      </label>
-                      <input
-                        type="text"
-                        name="expiryDate"
-                        value={formData.expiryDate}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="MM/YY"
-                        maxLength={5}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        CVV
-                      </label>
-                      <input
-                        type="text"
-                        name="cvv"
-                        value={formData.cvv}
-                        onChange={handleInputChange}
-                        required
-                        maxLength={3}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                        placeholder="123"
-                      />
-                    </div>
-                  </div>
+                <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-lg p-4 border border-cyan-500/30">
+                  <p className="text-gray-300 text-sm mb-2">
+                    <span className="font-semibold text-cyan-400">Secure Payment via Razorpay</span>
+                  </p>
+                  <p className="text-gray-400 text-xs">
+                    All transactions are encrypted and secured. We accept UPI, Cards, Net Banking, and Wallets.
+                  </p>
                 </div>
               </div>
 
@@ -299,12 +339,12 @@ export const Checkout = () => {
                 {isProcessing ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-                    <span>Processing...</span>
+                    <span>Processing Payment...</span>
                   </>
                 ) : (
                   <>
                     <Lock className="h-5 w-5" />
-                    <span>Complete Order</span>
+                    <span>Pay ₹ {getGrandTotal().toFixed(2)}</span>
                   </>
                 )}
               </button>
@@ -316,7 +356,7 @@ export const Checkout = () => {
               <h2 className="text-xl font-bold text-white mb-4">Order Summary</h2>
 
               <div className="space-y-3 mb-6">
-                {cart.map((item) => (
+                {checkoutItems.map((item) => (
                   <div key={item.id} className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-300">
@@ -324,11 +364,11 @@ export const Checkout = () => {
                       </span>
                       <div className="flex items-center space-x-2">
                         <span className="text-white font-semibold">
-                          Rs {(((item as any).discountedPrice || item.price) * item.quantity).toFixed(2)}
+                          ₹ {(((item as any).discountedPrice || item.price) * item.quantity).toFixed(2)}
                         </span>
                         {(item as any).discountedPrice && (item as any).discountedPrice < item.price && (
                           <span className="text-gray-400 text-xs line-through">
-                            Rs {(item.price * item.quantity).toFixed(2)}
+                            ₹ {(item.price * item.quantity).toFixed(2)}
                           </span>
                         )}
                       </div>
@@ -340,11 +380,11 @@ export const Checkout = () => {
               <div className="border-t border-cyan-500/20 pt-4 space-y-2">
                 <div className="flex justify-between text-gray-300">
                   <span>Subtotal</span>
-                  <span>Rs {getTotalPrice().toFixed(2)}</span>
+                  <span>₹ {getTotalPriceForCheckout().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">
                   <span>Tax (GST)</span>
-                  <span>Rs {getTotalTax().toFixed(2)}</span>
+                  <span>₹ {getTotalTax().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">
                   <span>Shipping</span>
@@ -354,7 +394,7 @@ export const Checkout = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-white">Total</span>
                     <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                      Rs {getGrandTotal().toFixed(2)}
+                      ₹ {getGrandTotal().toFixed(2)}
                     </span>
                   </div>
                 </div>

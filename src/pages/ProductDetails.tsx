@@ -293,10 +293,10 @@ export const ProductDetails = () => {
                     {product.discountedPrice ? (
                       <>
                         <span className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                          Rs {product.discountedPrice}
+                          ₹ {product.discountedPrice}
                         </span>
                         <span className="text-2xl font-semibold text-gray-400 line-through">
-                          Rs {product.price}
+                          ₹ {product.price}
                         </span>
                         <span className="text-lg font-semibold text-green-400">
                           {Math.round(((product.price - product.discountedPrice) / product.price) * 100)}% OFF
@@ -304,7 +304,7 @@ export const ProductDetails = () => {
                       </>
                     ) : (
                       <span className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                        Rs {product.price}
+                        ₹ {product.price}
                       </span>
                     )}
                   </div>
