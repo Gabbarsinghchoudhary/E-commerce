@@ -30,26 +30,37 @@ export const Checkout = () => {
   // Use buyNow product or cart items
   const checkoutItems = isBuyNow && buyNowProduct ? [{ ...buyNowProduct, quantity: 1 }] : cart;
 
-  // Calculate total tax based on each product's tax rate
-  const getTotalTax = () => {
-    return checkoutItems.reduce((total, item) => {
-      const itemPrice = (item as any).discountedPrice || item.price;
-      const itemTax = (item as any).tax || 10;
-      return total + (itemPrice * item.quantity * itemTax / 100);
-    }, 0);
+  // Get bulk discount price for an item
+  const getBulkDiscountPriceForCheckout = (item: any) => {
+    const basePrice = item.discountedPrice || item.price;
+    const bulkDiscounts = item.bulkDiscounts || [];
+    
+    if (bulkDiscounts.length === 0) {
+      return basePrice;
+    }
+
+    const applicableDiscount = bulkDiscounts
+      .filter((bulk: any) => item.quantity >= bulk.minQuantity)
+      .sort((a: any, b: any) => b.discount - a.discount)[0];
+
+    if (applicableDiscount) {
+      return basePrice * (1 - applicableDiscount.discount / 100);
+    }
+
+    return basePrice;
   };
 
-  // Calculate total price
+  // Calculate total price with bulk discounts
   const getTotalPriceForCheckout = () => {
     return checkoutItems.reduce((total, item) => {
-      const itemPrice = (item as any).discountedPrice || item.price;
-      return total + (itemPrice * item.quantity);
+      const pricePerItem = getBulkDiscountPriceForCheckout(item);
+      return total + (pricePerItem * item.quantity);
     }, 0);
   };
 
-  // Calculate grand total with tax
+  // Calculate grand total
   const getGrandTotal = () => {
-    return getTotalPriceForCheckout() + getTotalTax();
+    return getTotalPriceForCheckout();
   };
 
   useEffect(() => {
@@ -106,7 +117,7 @@ export const Checkout = () => {
               items: checkoutItems.map(item => ({
                 product: item.id,
                 productName: item.name,
-                productPrice: (item as any).discountedPrice || item.price,
+                // Remove productPrice - let backend calculate it for security
                 quantity: item.quantity,
               })),
               shippingAddress: {
@@ -120,6 +131,7 @@ export const Checkout = () => {
               paymentInfo: {},
               razorpayPaymentId: response.razorpay_payment_id,
               razorpayOrderId: response.razorpay_order_id,
+              razorpaySignature: response.razorpay_signature,
             };
 
             const orderResponse = await orderAPI.createOrder(orderData);
@@ -299,7 +311,7 @@ export const Checkout = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        ZIP Code
+                        PIN Code
                       </label>
                       <input
                         type="text"
@@ -356,35 +368,45 @@ export const Checkout = () => {
               <h2 className="text-xl font-bold text-white mb-4">Order Summary</h2>
 
               <div className="space-y-3 mb-6">
-                {checkoutItems.map((item) => (
-                  <div key={item.id} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-300">
-                        {item.name} x {item.quantity}
-                      </span>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-white font-semibold">
-                          ₹ {(((item as any).discountedPrice || item.price) * item.quantity).toFixed(2)}
+                {checkoutItems.map((item) => {
+                  const pricePerItem = getBulkDiscountPriceForCheckout(item);
+                  const totalItemPrice = pricePerItem * item.quantity;
+                  const bulkDiscounts = (item as any).bulkDiscounts || [];
+                  const applicableBulk = bulkDiscounts
+                    .filter((bulk: any) => item.quantity >= bulk.minQuantity)
+                    .sort((a: any, b: any) => b.discount - a.discount)[0];
+
+                  return (
+                    <div key={item.id} className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-300">
+                          {item.name} x {item.quantity}
                         </span>
-                        {(item as any).discountedPrice && (item as any).discountedPrice < item.price && (
-                          <span className="text-gray-400 text-xs line-through">
-                            ₹ {(item.price * item.quantity).toFixed(2)}
+                        <div className="flex items-center space-x-2">
+                          <span className="text-white font-semibold">
+                            ₹ {totalItemPrice.toFixed(2)}
                           </span>
-                        )}
+                          {applicableBulk && (
+                            <span className="text-xs font-bold text-green-400 bg-green-500/20 px-2 py-0.5 rounded">
+                              -{applicableBulk.discount}%
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      {applicableBulk && (
+                        <p className="text-xs text-green-400">
+                          Bulk discount applied: ₹{pricePerItem.toFixed(2)} each
+                        </p>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="border-t border-cyan-500/20 pt-4 space-y-2">
                 <div className="flex justify-between text-gray-300">
                   <span>Subtotal</span>
                   <span>₹ {getTotalPriceForCheckout().toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-gray-300">
-                  <span>Tax (GST)</span>
-                  <span>₹ {getTotalTax().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">
                   <span>Shipping</span>

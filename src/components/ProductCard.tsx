@@ -65,9 +65,9 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       <div className="relative p-6">
         <div className="flex items-center space-x-2 mb-2">
           <Zap className="h-4 w-4 text-cyan-400" />
-          <span className="text-xs text-cyan-400 font-semibold">{product.wattage}</span>
+          <span className="text-xs text-cyan-400 font-semibold">{product.material}</span>
           <span className="text-xs text-gray-500">|</span>
-          <span className="text-xs text-gray-400">{product.lumens} lumens</span>
+          <span className="text-xs text-gray-400">{product.height}</span>
         </div>
 
         <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors duration-300">
@@ -95,9 +95,6 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 </>
               )}
             </div>
-            {product.tax && (
-              <span className="text-xs text-gray-500 mt-1">+ {product.tax}% tax</span>
-            )}
           </div>
 
           <div className="flex justify-end">

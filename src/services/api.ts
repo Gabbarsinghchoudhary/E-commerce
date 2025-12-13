@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
@@ -8,15 +8,14 @@ const api: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Enable sending cookies with requests
 });
 
-// Request interceptor to add token
+// Request interceptor - No longer needed to manually add token
+// Token is now sent automatically via httpOnly cookies
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // Keep for backward compatibility if needed, but cookie will be primary
     return config;
   },
   (error) => {
@@ -29,12 +28,12 @@ api.interceptors.response.use(
   (response) => response,
   (error: AxiosError<{ message: string }>) => {
     if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
+      // Unauthorized - clear user data and redirect to login
       const currentPath = window.location.pathname;
       
       // Only redirect if not already on login page to prevent loop
       if (currentPath !== '/login') {
-        localStorage.removeItem('token');
+        // Token is in httpOnly cookie, just clear user data
         localStorage.removeItem('user');
         window.location.href = '/login';
       }
@@ -50,14 +49,18 @@ export interface Product {
   description: string;
   price: number;
   discountedPrice?: number;
-  tax: number;
   images: string[];
   category: string;
-  wattage: string;
-  lumens: number;
-  colorTemp: string;
-  lifespan: string;
+  material: string;
+  lightModes: string;
+  charging: string;
+  workingTime: string;
+  touchControl: string;
+  battery: string;
+  idealFor: string;
+  height: string;
   specifications: Array<{ key: string; value: string }>;
+  bulkDiscounts: Array<{ minQuantity: number; discount: number }>;
   inStock: boolean;
   stock: number;
   averageRating?: number;
@@ -81,7 +84,7 @@ export interface User {
 export interface OrderItem {
   product: string;
   productName: string;
-  productPrice: number;
+  productPrice?: number; // Optional - backend calculates for security
   quantity: number;
 }
 

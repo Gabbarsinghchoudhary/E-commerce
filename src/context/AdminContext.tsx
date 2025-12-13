@@ -25,8 +25,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Only fetch admin list if user is logged in
-    const token = localStorage.getItem('token');
-    if (token) {
+    // Token is now in httpOnly cookie, check user data instead
+    const userData = localStorage.getItem('user');
+    if (userData) {
       fetchAdmins();
     } else {
       setLoading(false);
@@ -34,13 +35,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const fetchAdmins = async () => {
-    // Check if token exists before fetching
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-
+    // Token is automatically sent via httpOnly cookie
     try {
       setLoading(true);
       const response = await adminAPI.getAllAdmins();

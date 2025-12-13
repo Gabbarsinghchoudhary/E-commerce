@@ -4,20 +4,18 @@ import { useCart } from '../context/CartContext';
 
 export const Cart = () => {
   const navigate = useNavigate();
-  const { cart, removeFromCart, updateQuantity, getTotalPrice } = useCart();
+  const { cart, removeFromCart, updateQuantity, getTotalPrice, getBulkDiscountPrice } = useCart();
 
-  // Calculate total tax based on each product's tax rate
-  const getTotalTax = () => {
-    return cart.reduce((total, item) => {
-      const itemPrice = (item as any).discountedPrice || item.price;
-      const itemTax = (item as any).tax || 10;
-      return total + (itemPrice * item.quantity * itemTax / 100);
-    }, 0);
-  };
+  // Get applicable bulk discount for an item
+  const getApplicableBulkDiscount = (item: any) => {
+    const bulkDiscounts = item.bulkDiscounts || [];
+    if (bulkDiscounts.length === 0) return null;
 
-  // Calculate grand total with tax
-  const getGrandTotal = () => {
-    return getTotalPrice() + getTotalTax();
+    const applicable = bulkDiscounts
+      .filter((bulk: any) => item.quantity >= bulk.minQuantity)
+      .sort((a: any, b: any) => b.discount - a.discount)[0];
+
+    return applicable || null;
   };
 
   if (cart.length === 0) {
@@ -100,28 +98,35 @@ export const Cart = () => {
                       </div>
 
                       <div className="text-right">
-                        <div className="flex items-center justify-end space-x-2 mb-1">
-                          <p className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                            ₹ {(((item as any).discountedPrice || item.price) * item.quantity).toFixed(2)}
-                          </p>
-                          {(item as any).discountedPrice && (item as any).discountedPrice < item.price && (
+                        {(() => {
+                          const bulkDiscount = getApplicableBulkDiscount(item);
+                          const pricePerItem = getBulkDiscountPrice(item);
+                          const originalPrice = (item as any).discountedPrice || item.price;
+                          const totalPrice = pricePerItem * item.quantity;
+
+                          return (
                             <>
-                              <p className="text-lg font-semibold text-gray-400 line-through">
-                                ₹ {(item.price * item.quantity).toFixed(2)}
+                              <div className="flex items-center justify-end space-x-2 mb-1">
+                                <p className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                                  ₹ {totalPrice.toFixed(2)}
+                                </p>
+                                {bulkDiscount && (
+                                  <span className="text-xs font-bold text-green-400 bg-green-500/20 px-2 py-1 rounded">
+                                    Bulk -{bulkDiscount.discount}%
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-400">
+                                ₹ {pricePerItem.toFixed(2)} each
+                                {bulkDiscount && (
+                                  <span className="ml-2 text-green-400">
+                                    (was ₹{originalPrice.toFixed(2)})
+                                  </span>
+                                )}
                               </p>
-                              <span className="text-xs font-bold text-green-400 bg-green-500/20 px-2 py-1 rounded">
-                                {Math.round(((item.price - (item as any).discountedPrice) / item.price) * 100)}% OFF
-                              </span>
                             </>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-400">
-                          ₹ {(item as any).discountedPrice || item.price} each
-                          {(item as any).discountedPrice && (item as any).discountedPrice < item.price && (
-                            <span className="line-through ml-2">₹ {item.price}</span>
-                          )}
-                          {(item as any).tax && <span className="ml-2 text-gray-500">(+{(item as any).tax}% tax)</span>}
-                        </p>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -143,15 +148,11 @@ export const Cart = () => {
                   <span>Shipping</span>
                   <span className="text-green-400">Free</span>
                 </div>
-                <div className="flex justify-between text-gray-300">
-                  <span>Tax (GST)</span>
-                  <span>₹ {getTotalTax().toFixed(2)}</span>
-                </div>
                 <div className="border-t border-cyan-500/20 pt-4">
                   <div className="flex justify-between items-center">
                     <span className="text-xl font-bold text-white">Total</span>
                     <span className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                      ₹ {getGrandTotal().toFixed(2)}
+                      ₹ {getTotalPrice().toFixed(2)}
                     </span>
                   </div>
                 </div>

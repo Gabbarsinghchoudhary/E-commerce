@@ -10,14 +10,18 @@ interface ProductForm {
   description: string;
   price: number;
   discountedPrice: number;
-  tax: number;
   images: string[];
   category: string;
-  wattage: string;
-  lumens: number;
-  colorTemp: string;
-  lifespan: string;
+  material: string;
+  lightModes: string;
+  charging: string;
+  workingTime: string;
+  touchControl: string;
+  battery: string;
+  idealFor: string;
+  height: string;
   specifications: { key: string; value: string }[];
+  bulkDiscounts: { minQuantity: number; discount: number }[];
   stock: number;
 }
 
@@ -32,14 +36,18 @@ export const AddProduct = () => {
     description: '',
     price: 0,
     discountedPrice: 0,
-    tax: 10,
     images: [],
     category: '',
-    wattage: '',
-    lumens: 0,
-    colorTemp: '',
-    lifespan: '',
+    material: '',
+    lightModes: '',
+    charging: '',
+    workingTime: '',
+    touchControl: '',
+    battery: '',
+    idealFor: '',
+    height: '',
     specifications: [],
+    bulkDiscounts: [],
     stock: 0,
   });
 
@@ -72,14 +80,18 @@ export const AddProduct = () => {
         description: formData.description,
         price: formData.price,
         discountedPrice: formData.discountedPrice || undefined,
-        tax: formData.tax,
         images: formData.images,
         category: formData.category,
-        wattage: formData.wattage,
-        lumens: formData.lumens,
-        colorTemp: formData.colorTemp,
-        lifespan: formData.lifespan,
+        material: formData.material,
+        lightModes: formData.lightModes,
+        charging: formData.charging,
+        workingTime: formData.workingTime,
+        touchControl: formData.touchControl,
+        battery: formData.battery,
+        idealFor: formData.idealFor,
+        height: formData.height,
         specifications: formData.specifications,
+        bulkDiscounts: formData.bulkDiscounts,
         inStock: true,
         stock: formData.stock || 0,
       });
@@ -90,14 +102,18 @@ export const AddProduct = () => {
         description: '',
         price: 0,
         discountedPrice: 0,
-        tax: 10,
         images: [],
         category: '',
-        wattage: '',
-        lumens: 0,
-        colorTemp: '',
-        lifespan: '',
+        material: '',
+        lightModes: '',
+        charging: '',
+        workingTime: '',
+        touchControl: '',
+        battery: '',
+        idealFor: '',
+        height: '',
         specifications: [],
+        bulkDiscounts: [],
         stock: 0,
       });
 
@@ -121,7 +137,7 @@ export const AddProduct = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'price' || name === 'discountedPrice' || name === 'tax' || name === 'lumens' || name === 'stock' ? parseFloat(value) || 0 : value,
+      [name]: name === 'price' || name === 'discountedPrice' || name === 'stock' ? parseFloat(value) || 0 : value,
     }));
   };
 
@@ -202,6 +218,29 @@ export const AddProduct = () => {
     }));
   };
 
+  const handleAddBulkDiscount = () => {
+    setFormData(prev => ({
+      ...prev,
+      bulkDiscounts: [...prev.bulkDiscounts, { minQuantity: 1, discount: 0 }],
+    }));
+  };
+
+  const handleBulkDiscountChange = (index: number, field: 'minQuantity' | 'discount', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      bulkDiscounts: prev.bulkDiscounts.map((bulk, i) =>
+        i === index ? { ...bulk, [field]: parseFloat(value) || 0 } : bulk
+      ),
+    }));
+  };
+
+  const handleRemoveBulkDiscount = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      bulkDiscounts: prev.bulkDiscounts.filter((_, i) => i !== index),
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-20 pb-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -264,23 +303,6 @@ export const AddProduct = () => {
                   value={formData.discountedPrice}
                   onChange={handleChange}
                   min="0"
-                  step="0.01"
-                  className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">
-                  Tax (%)
-                </label>
-                <input
-                  type="number"
-                  name="tax"
-                  value={formData.tax}
-                  onChange={handleChange}
-                  required
-                  min="0"
-                  max="100"
                   step="0.01"
                   className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                 />
@@ -410,61 +432,121 @@ export const AddProduct = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">
-                  Wattage
+                  Material
                 </label>
                 <input
                   type="text"
-                  name="wattage"
-                  value={formData.wattage}
+                  name="material"
+                  value={formData.material}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                  placeholder="e.g., 9W"
+                  placeholder="e.g., Plastic, Metal"
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">
-                  Lumens
+                  Light Modes
                 </label>
                 <input
-                  type="number"
-                  name="lumens"
-                  value={formData.lumens}
+                  type="text"
+                  name="lightModes"
+                  value={formData.lightModes}
                   onChange={handleChange}
                   required
-                  min="0"
                   className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                  placeholder="e.g., 3 Modes"
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">
-                  Color Temperature
+                  Charging
                 </label>
                 <input
                   type="text"
-                  name="colorTemp"
-                  value={formData.colorTemp}
+                  name="charging"
+                  value={formData.charging}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                  placeholder="e.g., 2700K"
+                  placeholder="e.g., USB Type-C"
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">
-                  Life Span
+                  Working Time
                 </label>
                 <input
                   type="text"
-                  name="lifespan"
-                  value={formData.lifespan}
+                  name="workingTime"
+                  value={formData.workingTime}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                  placeholder="e.g., 25000 hours"
+                  placeholder="e.g., 8-10 hours"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Touch Control
+                </label>
+                <input
+                  type="text"
+                  name="touchControl"
+                  value={formData.touchControl}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                  placeholder="e.g., Yes, No"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Battery
+                </label>
+                <input
+                  type="text"
+                  name="battery"
+                  value={formData.battery}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                  placeholder="e.g., 2000mAh"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Ideal For
+                </label>
+                <input
+                  type="text"
+                  name="idealFor"
+                  value={formData.idealFor}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                  placeholder="e.g., Study, Reading"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Height
+                </label>
+                <input
+                  type="text"
+                  name="height"
+                  value={formData.height}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                  placeholder="e.g., 40cm"
                 />
               </div>
 
@@ -533,6 +615,77 @@ export const AddProduct = () => {
                     </button>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* Bulk Discounts Section */}
+          <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-cyan-500/20 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">
+                  Bulk Purchase Discounts
+                </h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Set discounts for customers buying multiple quantities
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddBulkDiscount}
+                className="flex items-center space-x-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add Discount</span>
+              </button>
+            </div>
+
+            {formData.bulkDiscounts.length === 0 ? (
+              <p className="text-gray-400 text-center py-4">
+                No bulk discounts set. Click "Add Discount" to create quantity-based discounts.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {formData.bulkDiscounts.map((bulk, index) => (
+                  <div key={index} className="flex gap-4 items-start">
+                    <div className="flex-1">
+                      <label className="text-sm text-gray-400 mb-1 block">Minimum Quantity</label>
+                      <input
+                        type="number"
+                        value={bulk.minQuantity}
+                        onChange={(e) => handleBulkDiscountChange(index, 'minQuantity', e.target.value)}
+                        min="1"
+                        className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                        placeholder="e.g., 3"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-sm text-gray-400 mb-1 block">Discount (%)</label>
+                      <input
+                        type="number"
+                        value={bulk.discount}
+                        onChange={(e) => handleBulkDiscountChange(index, 'discount', e.target.value)}
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                        placeholder="e.g., 5"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveBulkDiscount(index)}
+                      className="mt-7 p-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                ))}
+                <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <p className="text-sm text-blue-400">
+                    💡 Example: Set "Min Qty: 3, Discount: 5%" to give 5% off when buying 3 or more items
+                  </p>
+                </div>
               </div>
             )}
           </div>

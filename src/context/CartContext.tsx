@@ -2,35 +2,20 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { cartAPI } from '../services/api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
+import { Product, CartItem } from '../types';
 
-// Convert backend Product to frontend format
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  images: string[];
-  category: string;
-  wattage: string;
-  lumens: number;
-  colorTemp: string;
-  lifespan: string;
-  inStock: boolean;
-}
-
-interface CartItem extends Product {
-  quantity: number;
-}
+// Use shared types from types/index.ts
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product) => Promise<void>;
+  addToCart: (product: Product, quantity?: number) => Promise<void>;
   removeFromCart: (productId: string) => Promise<void>;
   updateQuantity: (productId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   getTotalPrice: () => number;
   getTotalItems: () => number;
   loadCart: () => Promise<void>;
+  getBulkDiscountPrice: (item: CartItem) => number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -57,15 +42,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           description: item.product.description,
           price: item.product.price,
           discountedPrice: item.product.discountedPrice,
-          tax: item.product.tax || 10,
           images: item.product.images,
           category: item.product.category,
-          wattage: item.product.wattage,
-          lumens: item.product.lumens,
-          colorTemp: item.product.colorTemp,
-          lifespan: item.product.lifespan,
+          material: item.product.material,
+          lightModes: item.product.lightModes,
+          charging: item.product.charging,
+          workingTime: item.product.workingTime,
+          touchControl: item.product.touchControl,
+          battery: item.product.battery,
+          idealFor: item.product.idealFor,
+          height: item.product.height,
           specifications: item.product.specifications || [],
+          bulkDiscounts: item.product.bulkDiscounts || [],
           inStock: item.product.inStock,
+          stock: item.product.stock || 0,
           averageRating: item.product.averageRating,
           totalRatings: item.product.totalRatings,
           quantity: item.quantity,
@@ -91,17 +81,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
-  const addToCart = async (product: Product) => {
+  const addToCart = async (product: Product, quantity: number = 1) => {
     if (!user) {
       toast.error('Please login to add items to cart');
       return;
     }
 
     try {
-      const response = await cartAPI.addToCart(product.id, 1);
+      const response = await cartAPI.addToCart(product.id, quantity);
       if (response.success) {
         await loadCart(); // Reload cart from backend
-        toast.success('Added to cart');
+        toast.success(`Added ${quantity} item${quantity > 1 ? 's' : ''} to cart`);
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to add to cart');
@@ -160,10 +150,30 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getBulkDiscountPrice = (item: CartItem) => {
+    const basePrice = (item as any).discountedPrice || item.price;
+    const bulkDiscounts = (item as any).bulkDiscounts || [];
+    
+    if (bulkDiscounts.length === 0) {
+      return basePrice;
+    }
+
+    // Find the applicable bulk discount based on quantity
+    const applicableDiscount = bulkDiscounts
+      .filter((bulk: any) => item.quantity >= bulk.minQuantity)
+      .sort((a: any, b: any) => b.discount - a.discount)[0];
+
+    if (applicableDiscount) {
+      return basePrice * (1 - applicableDiscount.discount / 100);
+    }
+
+    return basePrice;
+  };
+
   const getTotalPrice = () => {
     return cart.reduce((total, item) => {
-      const itemPrice = (item as any).discountedPrice || item.price;
-      return total + itemPrice * item.quantity;
+      const pricePerItem = getBulkDiscountPrice(item);
+      return total + pricePerItem * item.quantity;
     }, 0);
   };
 
@@ -182,6 +192,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         getTotalPrice,
         getTotalItems,
         loadCart,
+        getBulkDiscountPrice,
       }}
     >
       {children}

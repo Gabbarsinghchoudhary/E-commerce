@@ -25,31 +25,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user is logged in on mount
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Validate token and get user data
-      authAPI.getMe()
-        .then((response) => {
-          const userData = response.user;
-          setUser({
-            id: userData.id,
-            email: userData.email,
-            name: userData.name,
-            isAdmin: userData.isAdmin,
-          });
-        })
-        .catch(() => {
-          // Invalid token, clear it
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-        })
-        .finally(() => {
-          setIsLoading(false);
+    // Check if user is logged in on mount by calling /me endpoint
+    // Token is sent automatically via httpOnly cookie
+    authAPI.getMe()
+      .then((response) => {
+        const userData = response.user;
+        setUser({
+          id: userData.id,
+          email: userData.email,
+          name: userData.name,
+          isAdmin: userData.isAdmin,
         });
-    } else {
-      setIsLoading(false);
-    }
+        // Store user data in localStorage for offline access
+        localStorage.setItem('user', JSON.stringify(userData));
+      })
+      .catch(() => {
+        // No valid cookie or session expired
+        localStorage.removeItem('user');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   const sendOtp = async (email: string) => {
@@ -68,10 +64,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       const response = await authAPI.verifyOtp(email, otp);
       
-      // Store token
-      localStorage.setItem('token', response.token);
-      
-      // Set user data
+      // Token is now stored in httpOnly cookie by backend
+      // Just store user data
       const userData = response.user;
       const userObj: User = {
         id: userData.id,
@@ -80,8 +74,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAdmin: userData.isAdmin,
       };
       
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
       setUser(userObj);
-      localStorage.setItem('user', JSON.stringify(userObj));
     } catch (err) {
       const errorMessage = handleAPIError(err);
       setError(errorMessage);
@@ -91,7 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      // Call backend logout endpoint with JWT token (automatically added by interceptor)
+      // Call backend logout endpoint - cookie will be cleared by backend
       await authAPI.logout();
     } catch (error) {
       // Ignore errors on logout - still clear local state
@@ -99,7 +94,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       // Always clear local state regardless of API response
       setUser(null);
-      localStorage.removeItem('token');
       localStorage.removeItem('user');
     }
   };

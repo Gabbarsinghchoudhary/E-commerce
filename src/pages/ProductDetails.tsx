@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ShoppingCart, ArrowLeft, Zap, Lightbulb, Clock, Thermometer, Star, ChevronLeft, ChevronRight, Share2, Package } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Zap, Lightbulb, Clock, Star, ChevronLeft, ChevronRight, Share2, Package } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
@@ -49,14 +49,18 @@ export const ProductDetails = () => {
           description: foundProduct.description,
           price: foundProduct.price,
           discountedPrice: foundProduct.discountedPrice,
-          tax: foundProduct.tax,
           images: foundProduct.images,
           category: foundProduct.category,
-          wattage: foundProduct.wattage,
-          lumens: foundProduct.lumens,
-          colorTemp: foundProduct.colorTemp,
-          lifespan: foundProduct.lifespan,
+          material: foundProduct.material,
+          lightModes: foundProduct.lightModes,
+          charging: foundProduct.charging,
+          workingTime: foundProduct.workingTime,
+          touchControl: foundProduct.touchControl,
+          battery: foundProduct.battery,
+          idealFor: foundProduct.idealFor,
+          height: foundProduct.height,
           specifications: foundProduct.specifications,
+          bulkDiscounts: foundProduct.bulkDiscounts || [],
           inStock: foundProduct.inStock,
           stock: (foundProduct as any).stock || 0,
           averageRating: foundProduct.averageRating,
@@ -73,14 +77,18 @@ export const ProductDetails = () => {
             description: p.description,
             price: p.price,
             discountedPrice: p.discountedPrice,
-            tax: p.tax || 10,
             images: p.images,
             category: p.category,
-            wattage: p.wattage,
-            lumens: p.lumens,
-            colorTemp: p.colorTemp,
-            lifespan: p.lifespan,
+            material: p.material,
+            lightModes: p.lightModes,
+            charging: p.charging,
+            workingTime: p.workingTime,
+            touchControl: p.touchControl,
+            battery: p.battery,
+            idealFor: p.idealFor,
+            height: p.height,
             specifications: p.specifications || [],
+            bulkDiscounts: p.bulkDiscounts || [],
             inStock: p.inStock,
             stock: (p as any).stock || 0,
             averageRating: p.averageRating,
@@ -244,31 +252,59 @@ export const ProductDetails = () => {
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-start space-x-3">
-                  <Zap className="h-5 w-5 text-cyan-400 mt-1" />
+                  <Package className="h-5 w-5 text-cyan-400 mt-1" />
                   <div>
-                    <p className="text-sm text-gray-400">Wattage</p>
-                    <p className="text-white font-semibold">{product.wattage}</p>
+                    <p className="text-sm text-gray-400">Material</p>
+                    <p className="text-white font-semibold">{product.material}</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <Star className="h-5 w-5 text-blue-400 mt-1" />
+                  <Lightbulb className="h-5 w-5 text-blue-400 mt-1" />
                   <div>
-                    <p className="text-sm text-gray-400">Brightness</p>
-                    <p className="text-white font-semibold">{product.lumens} lumens</p>
+                    <p className="text-sm text-gray-400">Light Modes</p>
+                    <p className="text-white font-semibold">{product.lightModes}</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <Thermometer className="h-5 w-5 text-purple-400 mt-1" />
+                  <Zap className="h-5 w-5 text-purple-400 mt-1" />
                   <div>
-                    <p className="text-sm text-gray-400">Color Temp</p>
-                    <p className="text-white font-semibold">{product.colorTemp}</p>
+                    <p className="text-sm text-gray-400">Charging</p>
+                    <p className="text-white font-semibold">{product.charging}</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
                   <Clock className="h-5 w-5 text-green-400 mt-1" />
                   <div>
-                    <p className="text-sm text-gray-400">Lifespan</p>
-                    <p className="text-white font-semibold">{product.lifespan}</p>
+                    <p className="text-sm text-gray-400">Working Time</p>
+                    <p className="text-white font-semibold">{product.workingTime}</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <Star className="h-5 w-5 text-amber-400 mt-1" />
+                  <div>
+                    <p className="text-sm text-gray-400">Touch Control</p>
+                    <p className="text-white font-semibold">{product.touchControl}</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <Zap className="h-5 w-5 text-rose-400 mt-1" />
+                  <div>
+                    <p className="text-sm text-gray-400">Battery</p>
+                    <p className="text-white font-semibold">{product.battery}</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <Package className="h-5 w-5 text-indigo-400 mt-1" />
+                  <div>
+                    <p className="text-sm text-gray-400">Ideal For</p>
+                    <p className="text-white font-semibold">{product.idealFor}</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <Package className="h-5 w-5 text-teal-400 mt-1" />
+                  <div>
+                    <p className="text-sm text-gray-400">Height</p>
+                    <p className="text-white font-semibold">{product.height}</p>
                   </div>
                 </div>
                 {product.specifications && product.specifications.length > 0 && 
@@ -284,6 +320,50 @@ export const ProductDetails = () => {
                 }
               </div>
             </div>
+
+            {/* Bulk Discount Section */}
+            {product.bulkDiscounts && product.bulkDiscounts.length > 0 && (
+              <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 backdrop-blur-xl rounded-2xl border border-green-500/30 p-6">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                  <Package className="h-5 w-5 text-green-400" />
+                  <span>Bulk Purchase Discounts - Click to Add</span>
+                </h3>
+                <div className="space-y-3">
+                  {product.bulkDiscounts
+                    .sort((a, b) => a.minQuantity - b.minQuantity)
+                    .map((bulk, index) => (
+                      <button 
+                        key={index} 
+                        onClick={async () => {
+                          if (!user) {
+                            toast.error('Please login to add items to cart');
+                            navigate('/login');
+                            return;
+                          }
+                          // Add the product with the specific quantity in one call
+                          await addToCart(product, bulk.minQuantity);
+                          toast.success(`Added ${bulk.minQuantity} items to cart with ${bulk.discount}% discount!`);
+                          navigate('/cart');
+                        }}
+                        className="w-full flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-green-500/20 hover:bg-slate-700/50 hover:border-green-400/40 transition-all cursor-pointer group"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="bg-green-500/20 p-2 rounded-lg group-hover:bg-green-500/30 transition-colors">
+                            <span className="text-green-400 font-bold text-lg">{bulk.minQuantity}+</span>
+                          </div>
+                          <div className="text-left">
+                            <p className="text-white font-semibold group-hover:text-green-400 transition-colors">Buy {bulk.minQuantity} or more</p>
+                            <p className="text-sm text-gray-400">Get {bulk.discount}% off each item</p>
+                          </div>
+                        </div>
+                        <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold group-hover:scale-110 transition-transform">
+                          -{bulk.discount}%
+                        </div>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
 
             <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl border border-cyan-500/20 p-6">
               <div className="flex items-end justify-between mb-6">
@@ -308,9 +388,6 @@ export const ProductDetails = () => {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-400 mt-2">
-                    (Inclusive of {product.tax}% tax)
-                  </p>
                 </div>
                 <div className="text-right">
                   <p className={`text-sm font-semibold ${product.inStock ? 'text-green-400' : 'text-red-400'}`}>
