@@ -226,7 +226,7 @@ export const ManageProducts = () => {
 
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
-                  <p className="text-gray-400 text-sm mb-4 line-clamp-2">{product.description}</p>
+                  <p className="text-gray-400 text-sm mb-4 line-clamp-3 whitespace-pre-line">{product.description}</p>
 
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
@@ -517,6 +517,65 @@ export const ManageProducts = () => {
                       className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     />
                   </div>
+                </div>
+
+                {/* Product Images */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-sm font-medium text-gray-300">Product Images</label>
+                    <button
+                      onClick={() => setEditForm({
+                        ...editForm,
+                        images: [...editForm.images, '']
+                      })}
+                      className="flex items-center space-x-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Add Image</span>
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {editForm.images.map((imageUrl, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <div className="flex-1 flex items-center space-x-2">
+                          {imageUrl && (
+                            <img 
+                              src={imageUrl} 
+                              alt={`Product ${index + 1}`}
+                              className="w-16 h-16 object-cover rounded-lg border border-slate-600"
+                              onError={(e) => {
+                                e.currentTarget.src = 'https://via.placeholder.com/150?text=No+Image';
+                              }}
+                            />
+                          )}
+                          <input
+                            type="url"
+                            placeholder="Enter image URL"
+                            value={imageUrl}
+                            onChange={(e) => {
+                              const newImages = [...editForm.images];
+                              newImages[index] = e.target.value;
+                              setEditForm({ ...editForm, images: newImages });
+                            }}
+                            className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                          />
+                        </div>
+                        <button
+                          onClick={() => setEditForm({
+                            ...editForm,
+                            images: editForm.images.filter((_, i) => i !== index)
+                          })}
+                          className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                          disabled={editForm.images.length === 1}
+                        >
+                          <X className="h-4 w-4 text-white" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">
+                    Add image URLs. At least one image is required.
+                  </p>
                 </div>
 
                 {/* Bulk Discounts */}

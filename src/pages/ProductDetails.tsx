@@ -231,7 +231,7 @@ export const ProductDetails = () => {
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
                 {product.name}
               </h1>
-              <div className="flex items-center space-x-2 mb-4">
+              <div className="flex items-center space-x-2 mb-6">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
@@ -240,80 +240,86 @@ export const ProductDetails = () => {
                 ))}
                 <span className="text-gray-400 ml-2">(4.8/5)</span>
               </div>
-              <p className="text-xl text-gray-300 leading-relaxed">
-                {product.description}
-              </p>
+              <div className="text-gray-300 leading-relaxed space-y-2">
+                {product.description.split('\n').map((paragraph, index) => (
+                  paragraph.trim() && (
+                    <p key={index} className="text-base">
+                      {paragraph.trim()}
+                    </p>
+                  )
+                ))}
+              </div>
             </div>
 
-            <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-cyan-500/20 p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-                <Lightbulb className="h-5 w-5 text-cyan-400" />
+            <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-cyan-500/20 p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center space-x-2">
+                <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-400" />
                 <span>Specifications</span>
               </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-start space-x-3">
-                  <Package className="h-5 w-5 text-cyan-400 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-400">Material</p>
-                    <p className="text-white font-semibold">{product.material}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-400 mt-1 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-400">Material</p>
+                    <p className="text-sm sm:text-base text-white font-semibold break-words">{product.material}</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <Lightbulb className="h-5 w-5 text-blue-400 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-400">Light Modes</p>
-                    <p className="text-white font-semibold">{product.lightModes}</p>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400 mt-1 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-400">Light Modes</p>
+                    <p className="text-sm sm:text-base text-white font-semibold break-words">{product.lightModes}</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <Zap className="h-5 w-5 text-purple-400 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-400">Charging</p>
-                    <p className="text-white font-semibold">{product.charging}</p>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400 mt-1 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-400">Charging</p>
+                    <p className="text-sm sm:text-base text-white font-semibold break-words">{product.charging}</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <Clock className="h-5 w-5 text-green-400 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-400">Working Time</p>
-                    <p className="text-white font-semibold">{product.workingTime}</p>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-green-400 mt-1 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-400">Working Time</p>
+                    <p className="text-sm sm:text-base text-white font-semibold break-words">{product.workingTime}</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <Star className="h-5 w-5 text-amber-400 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-400">Touch Control</p>
-                    <p className="text-white font-semibold">{product.touchControl}</p>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <Star className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400 mt-1 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-400">Touch Control</p>
+                    <p className="text-sm sm:text-base text-white font-semibold break-words">{product.touchControl}</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <Zap className="h-5 w-5 text-rose-400 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-400">Battery</p>
-                    <p className="text-white font-semibold">{product.battery}</p>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-rose-400 mt-1 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-400">Battery</p>
+                    <p className="text-sm sm:text-base text-white font-semibold break-words">{product.battery}</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <Package className="h-5 w-5 text-indigo-400 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-400">Ideal For</p>
-                    <p className="text-white font-semibold">{product.idealFor}</p>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-400 mt-1 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-400">Ideal For</p>
+                    <p className="text-sm sm:text-base text-white font-semibold break-words">{product.idealFor}</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <Package className="h-5 w-5 text-teal-400 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-400">Height</p>
-                    <p className="text-white font-semibold">{product.height}</p>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 text-teal-400 mt-1 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-400">Height</p>
+                    <p className="text-sm sm:text-base text-white font-semibold break-words">{product.height}</p>
                   </div>
                 </div>
                 {product.specifications && product.specifications.length > 0 && 
                   product.specifications.map((spec, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <Package className="h-5 w-5 text-amber-400 mt-1" />
-                      <div>
-                        <p className="text-sm text-gray-400">{spec.key}</p>
-                        <p className="text-white font-semibold">{spec.value}</p>
+                    <div key={index} className="flex items-start space-x-2 sm:space-x-3">
+                      <Package className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400 mt-1 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs sm:text-sm text-gray-400">{spec.key}</p>
+                        <p className="text-sm sm:text-base text-white font-semibold break-words">{spec.value}</p>
                       </div>
                     </div>
                   ))
@@ -365,25 +371,25 @@ export const ProductDetails = () => {
               </div>
             )}
 
-            <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl border border-cyan-500/20 p-6">
-              <div className="flex items-end justify-between mb-6">
+            <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl border border-cyan-500/20 p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-4 sm:mb-6">
                 <div>
-                  <p className="text-gray-400 text-sm mb-1">Price</p>
-                  <div className="flex items-center space-x-4">
+                  <p className="text-gray-400 text-xs sm:text-sm mb-1">Price</p>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                     {product.discountedPrice ? (
                       <>
-                        <span className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                        <span className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                           ₹ {product.discountedPrice}
                         </span>
-                        <span className="text-2xl font-semibold text-gray-400 line-through">
+                        <span className="text-lg sm:text-2xl font-semibold text-gray-400 line-through">
                           ₹ {product.price}
                         </span>
-                        <span className="text-lg font-semibold text-green-400">
+                        <span className="text-sm sm:text-lg font-semibold text-green-400 bg-green-500/20 px-2 py-1 rounded">
                           {Math.round(((product.price - product.discountedPrice) / product.price) * 100)}% OFF
                         </span>
                       </>
                     ) : (
-                      <span className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                      <span className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                         ₹ {product.price}
                       </span>
                     )}
@@ -397,42 +403,42 @@ export const ProductDetails = () => {
               </div>
 
               {user && user.isAdmin ? (
-                <div className="w-full bg-slate-700/50 border border-cyan-500/30 text-cyan-400 font-semibold py-4 rounded-xl flex items-center justify-center space-x-3">
-                  <Lightbulb className="h-6 w-6" />
-                  <span className="text-lg">Admin View - Purchase Disabled</span>
+                <div className="w-full bg-slate-700/50 border border-cyan-500/30 text-cyan-400 font-semibold py-3 sm:py-4 rounded-xl flex items-center justify-center space-x-2 sm:space-x-3">
+                  <Lightbulb className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <span className="text-sm sm:text-lg">Admin View - Purchase Disabled</span>
                 </div>
               ) : (
                 <>
                   <button
                     onClick={handleAddToCart}
                     disabled={!product.inStock}
-                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-4 rounded-xl flex items-center justify-center space-x-3 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-3 sm:py-4 rounded-xl flex items-center justify-center space-x-2 sm:space-x-3 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
-                    <ShoppingCart className="h-6 w-6" />
-                    <span className="text-lg">Add to Cart</span>
+                    <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
+                    <span className="text-base sm:text-lg">Add to Cart</span>
                   </button>
                   <button
                     onClick={handleBuyNow}
                     disabled={!product.inStock}
-                    className="w-full mt-4 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-4 rounded-xl flex items-center justify-center space-x-3 transition-all duration-300 hover:shadow-lg hover:shadow-pink-500/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="w-full mt-3 sm:mt-4 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 sm:py-4 rounded-xl flex items-center justify-center space-x-2 sm:space-x-3 transition-all duration-300 hover:shadow-lg hover:shadow-pink-500/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
-                    <span className="text-lg">Buy Now</span>
+                    <span className="text-base sm:text-lg">Buy Now</span>
                   </button>
                 </>
               )}
             </div>
 
-            <div className="bg-slate-800/30 backdrop-blur-xl rounded-2xl border border-cyan-500/10 p-6">
-                          <div className="flex justify-end mt-6">
+            <div className="bg-slate-800/30 backdrop-blur-xl rounded-2xl border border-cyan-500/10 p-4 sm:p-6">
+                          <div className="flex justify-end mb-4 sm:mb-6">
                             <button
                               onClick={handleShare}
-                              className="flex items-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/50"
+                              className="flex items-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/50"
                             >
-                              <Share2 className="h-5 w-5" />
-                              <span>Share Product</span>
+                              <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                              <span className="text-sm sm:text-base">Share Prod</span>
                             </button>
                           </div>
-              <h3 className="text-lg font-semibold text-white mb-3">Features</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-3">Features</h3>
               <ul className="space-y-2">
                 <li className="flex items-center space-x-2 text-gray-300">
                   <div className="h-2 w-2 bg-cyan-400 rounded-full"></div>

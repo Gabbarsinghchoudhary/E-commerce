@@ -74,7 +74,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           {product.name}
         </h3>
 
-        <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+        <p className="text-gray-400 text-sm mb-4 line-clamp-2 whitespace-pre-line">
           {product.description}
         </p>
 
