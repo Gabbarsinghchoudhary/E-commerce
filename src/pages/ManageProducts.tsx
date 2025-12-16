@@ -29,6 +29,7 @@ interface Product {
   bulkDiscounts: Array<{ minQuantity: number; discount: number }>;
   inStock: boolean;
   stock: number;
+  sortOrder?: number;
 }
 
 export const ManageProducts = () => {
@@ -78,7 +79,10 @@ export const ManageProducts = () => {
         bulkDiscounts: p.bulkDiscounts || [],
         inStock: p.inStock,
         stock: (p as any).stock || 0,
+        sortOrder: (p as any).sortOrder || 0,
       }));
+      
+      // Products are already sorted by backend (sortOrder, then createdAt)
       
       setProductList(convertedProducts);
     } catch (err) {
@@ -172,6 +176,7 @@ export const ManageProducts = () => {
         bulkDiscounts: editForm.bulkDiscounts,
         inStock: editForm.inStock,
         stock: editForm.stock,
+        sortOrder: editForm.sortOrder || 0,
       } as any);
 
       toast.success('Product updated successfully!');
@@ -207,62 +212,69 @@ export const ManageProducts = () => {
             <p className="text-gray-400 text-lg">No products available</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {productList.map((product) => (
               <div
                 key={product.id}
                 className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-cyan-500/20 overflow-hidden hover:border-cyan-500/50 transition-all duration-300"
               >
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative h-32 sm:h-48 overflow-hidden">
                   <img
                     src={product.images[0]}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute top-2 right-2 bg-cyan-500/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                  <div className="absolute top-2 right-2 bg-cyan-500/90 backdrop-blur-sm px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                     <span className="text-xs font-bold text-white">{product.category}</span>
                   </div>
+                  
+                  {/* Sort Order Display */}
+                  {product.sortOrder !== undefined && product.sortOrder > 0 && (
+                    <div className="absolute top-2 left-2 bg-purple-500/90 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                      <span className="text-xs font-bold text-white">#{product.sortOrder}</span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
-                  <p className="text-gray-400 text-sm mb-4 line-clamp-3 whitespace-pre-line">{product.description}</p>
+                <div className="p-3 sm:p-6">
+                  <h3 className="text-sm sm:text-xl font-bold text-white mb-1 sm:mb-2 line-clamp-2">{product.name}</h3>
+                  <p className="text-gray-400 text-xs sm:text-sm mb-2 sm:mb-4 line-clamp-2 sm:line-clamp-3 whitespace-pre-line">{product.description}</p>
 
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
+                  <div className="flex items-center justify-between mb-2 sm:mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
                       {product.discountedPrice ? (
                         <>
-                          <span className="text-2xl font-bold text-cyan-400">₹{product.discountedPrice.toFixed(2)}</span>
-                          <span className="text-lg font-semibold text-gray-400 line-through">₹{product.price.toFixed(2)}</span>
+                          <span className="text-base sm:text-2xl font-bold text-cyan-400">₹{product.discountedPrice.toFixed(2)}</span>
+                          <span className="text-xs sm:text-lg font-semibold text-gray-400 line-through">₹{product.price.toFixed(2)}</span>
                         </>
                       ) : (
-                        <span className="text-2xl font-bold text-cyan-400">₹{product.price.toFixed(2)}</span>
+                        <span className="text-base sm:text-2xl font-bold text-cyan-400">₹{product.price.toFixed(2)}</span>
                       )}
                     </div>
                   </div>
 
                   {/* Stock Section */}
-                  <div className="mb-4 p-3 bg-slate-900/50 rounded-lg">
+                  <div className="mb-2 sm:mb-4 p-2 sm:p-3 bg-slate-900/50 rounded-lg">
                     {editingStock === product.id ? (
                       <div className="space-y-2">
-                        <label className="text-sm text-gray-400">Update Stock</label>
-                        <div className="flex space-x-2">
+                        <label className="text-xs sm:text-sm text-gray-400">Update Stock</label>
+                        <div className="flex space-x-1 sm:space-x-2">
                           <input
                             type="number"
                             min="0"
                             value={stockValue}
                             onChange={(e) => setStockValue(parseInt(e.target.value) || 0)}
-                            className="flex-1 px-3 py-2 bg-slate-800 border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                            className="flex-1 px-2 py-1 sm:px-3 sm:py-2 bg-slate-800 border border-cyan-500/30 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                           />
                           <button
                             onClick={() => handleUpdateStock(product.id)}
-                            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors"
+                            className="px-2 sm:px-4 py-1 sm:py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs sm:text-sm rounded-lg transition-colors"
                           >
                             Save
                           </button>
                           <button
                             onClick={() => setEditingStock(null)}
-                            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                            className="px-2 sm:px-4 py-1 sm:py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs sm:text-sm rounded-lg transition-colors"
                           >
                             Cancel
                           </button>
@@ -271,10 +283,10 @@ export const ManageProducts = () => {
                     ) : (
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-400">Stock</p>
-                          <p className="text-lg font-bold text-white">{product.stock} units</p>
+                          <p className="text-xs sm:text-sm text-gray-400">Stock</p>
+                          <p className="text-sm sm:text-lg font-bold text-white">{product.stock} units</p>
                           <span
-                            className={`text-sm font-semibold ${
+                            className={`text-xs sm:text-sm font-semibold ${
                               product.inStock ? 'text-green-400' : 'text-red-400'
                             }`}
                           >
@@ -283,35 +295,35 @@ export const ManageProducts = () => {
                         </div>
                         <button
                           onClick={() => startEditingStock(product.id, product.stock)}
-                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                          className="p-1.5 sm:p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
                           title="Edit Stock"
                         >
-                          <Edit className="h-4 w-4 text-cyan-400" />
+                          <Edit className="h-3 w-3 sm:h-4 sm:w-4 text-cyan-400" />
                         </button>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex space-x-2">
+                  <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2">
                     <button
                       onClick={() => handleView(product.id)}
-                      className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs sm:text-sm rounded-lg transition-colors"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span>View</span>
                     </button>
                     <button
                       onClick={() => handleEditProduct(product)}
-                      className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs sm:text-sm rounded-lg transition-colors"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span>Edit</span>
                     </button>
                     <button
                       onClick={() => setDeleteConfirm(product.id)}
-                      className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm rounded-lg transition-colors"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span>Delete</span>
                     </button>
                   </div>
@@ -356,35 +368,35 @@ export const ManageProducts = () => {
 
         {/* Edit Product Modal */}
         {editingProduct && editForm && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-slate-800 rounded-2xl border border-cyan-500/30 p-6 max-w-4xl w-full my-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Edit Product</h2>
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+            <div className="bg-slate-800 rounded-2xl border border-cyan-500/30 w-full max-w-4xl my-4 sm:my-8">
+              <div className="flex items-center justify-between p-3 sm:p-6 border-b border-cyan-500/20">
+                <h2 className="text-lg sm:text-2xl font-bold text-white">Edit Product</h2>
                 <button
                   onClick={() => {
                     setEditingProduct(null);
                     setEditForm(null);
                   }}
-                  className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                  className="text-gray-400 hover:text-white transition-colors"
                 >
-                  <X className="h-6 w-6 text-gray-400" />
+                  <X className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" />
                 </button>
               </div>
 
-              <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+              <div className="space-y-4 sm:space-y-6 max-h-[70vh] overflow-y-auto pr-1 sm:pr-2 p-3 sm:p-6">
                 {/* Basic Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Product Name</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">Product Name</label>
                     <input
                       type="text"
                       value={editForm.name}
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                      className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      className="w-full px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">Category</label>
                     <select
                       value={editForm.category}
                       onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
@@ -403,19 +415,19 @@ export const ManageProducts = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">Description</label>
                   <textarea
                     value={editForm.description}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     rows={3}
-                    className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    className="w-full px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   />
                 </div>
 
                 {/* Pricing */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Price (₹)</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">Price (₹)</label>
                     <input
                       type="number"
                       value={editForm.price}
@@ -442,6 +454,20 @@ export const ManageProducts = () => {
                     />
                   </div>
                 </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Display Order</label>
+                <input
+                  type="number"
+                  value={(editForm as any).sortOrder || 0}
+                  onChange={(e) => setEditForm({ ...editForm, sortOrder: parseInt(e.target.value) || 0 } as any)}
+                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  placeholder="Lower numbers appear first (0 = default)"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Set product display order. Lower numbers show first. Leave at 0 for default ordering.
+                </p>
+              </div>
 
                 {/* Technical Specifications */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -521,60 +547,125 @@ export const ManageProducts = () => {
 
                 {/* Product Images */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="block text-sm font-medium text-gray-300">Product Images</label>
-                    <button
-                      onClick={() => setEditForm({
-                        ...editForm,
-                        images: [...editForm.images, '']
-                      })}
-                      className="flex items-center space-x-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span>Add Image</span>
-                    </button>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300">Product Images</label>
+                    <div className="flex space-x-2">
+                      <label className="flex items-center space-x-1 px-2 sm:px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-xs sm:text-sm cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            files.forEach((file) => {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setEditForm({
+                                  ...editForm,
+                                  images: [...editForm.images, reader.result as string]
+                                });
+                              };
+                              reader.readAsDataURL(file);
+                            });
+                            e.target.value = '';
+                          }}
+                          className="hidden"
+                        />
+                        <Package className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span>Upload</span>
+                      </label>
+                      <button
+                        onClick={() => setEditForm({
+                          ...editForm,
+                          images: [...editForm.images, '']
+                        })}
+                        className="flex items-center space-x-1 px-2 sm:px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-xs sm:text-sm"
+                      >
+                        <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span>Add URL</span>
+                      </button>
+                    </div>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {editForm.images.map((imageUrl, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div className="flex-1 flex items-center space-x-2">
+                      <div key={index} className="flex items-center space-x-1 sm:space-x-2">
+                        <div className="flex flex-col space-y-0.5 sm:space-y-1">
+                          <button
+                            onClick={() => {
+                              if (index === 0) return;
+                              const newImages = [...editForm.images];
+                              [newImages[index], newImages[index - 1]] = [newImages[index - 1], newImages[index]];
+                              setEditForm({ ...editForm, images: newImages });
+                            }}
+                            disabled={index === 0}
+                            className="p-0.5 sm:p-1 bg-slate-600 hover:bg-slate-500 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Move up"
+                          >
+                            <svg className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (index === editForm.images.length - 1) return;
+                              const newImages = [...editForm.images];
+                              [newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]];
+                              setEditForm({ ...editForm, images: newImages });
+                            }}
+                            disabled={index === editForm.images.length - 1}
+                            className="p-0.5 sm:p-1 bg-slate-600 hover:bg-slate-500 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Move down"
+                          >
+                            <svg className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                        </div>
+                        <span className="text-cyan-400 font-semibold text-xs sm:text-sm w-5 sm:w-6">#{index + 1}</span>
+                        <div className="flex-1 flex items-center space-x-1 sm:space-x-2">
                           {imageUrl && (
                             <img 
                               src={imageUrl} 
                               alt={`Product ${index + 1}`}
-                              className="w-16 h-16 object-cover rounded-lg border border-slate-600"
+                              className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg border border-slate-600 flex-shrink-0"
                               onError={(e) => {
                                 e.currentTarget.src = 'https://via.placeholder.com/150?text=No+Image';
                               }}
                             />
                           )}
-                          <input
-                            type="url"
-                            placeholder="Enter image URL"
-                            value={imageUrl}
-                            onChange={(e) => {
-                              const newImages = [...editForm.images];
-                              newImages[index] = e.target.value;
-                              setEditForm({ ...editForm, images: newImages });
-                            }}
-                            className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                          />
+                          {imageUrl.startsWith('data:') ? (
+                            <div className="flex-1 px-2 py-1.5 sm:px-3 sm:py-2 bg-slate-700 border border-green-500 rounded-lg text-green-400 text-xs sm:text-sm min-w-0 overflow-hidden">
+                              Uploaded Image
+                            </div>
+                          ) : (
+                            <input
+                              type="url"
+                              placeholder="Image URL"
+                              value={imageUrl}
+                              onChange={(e) => {
+                                const newImages = [...editForm.images];
+                                newImages[index] = e.target.value;
+                                setEditForm({ ...editForm, images: newImages });
+                              }}
+                              className="flex-1 px-2 py-1.5 sm:px-3 sm:py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 min-w-0"
+                            />
+                          )}
                         </div>
                         <button
                           onClick={() => setEditForm({
                             ...editForm,
                             images: editForm.images.filter((_, i) => i !== index)
                           })}
-                          className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                          className="p-1 sm:p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex-shrink-0"
                           disabled={editForm.images.length === 1}
                         >
-                          <X className="h-4 w-4 text-white" />
+                          <X className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                         </button>
                       </div>
                     ))}
                   </div>
                   <p className="text-xs text-gray-400 mt-2">
-                    Add image URLs. At least one image is required.
+                    Upload images or add URLs. Use arrows to reorder. First image is the main display image.
                   </p>
                 </div>
 
@@ -688,19 +779,19 @@ export const ManageProducts = () => {
               </div>
 
               {/* Modal Actions */}
-              <div className="flex space-x-3 mt-6 pt-6 border-t border-slate-700">
+              <div className="flex space-x-2 sm:space-x-3 p-3 sm:p-6 border-t border-slate-700">
                 <button
                   onClick={() => {
                     setEditingProduct(null);
                     setEditForm(null);
                   }}
-                  className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-slate-700 hover:bg-slate-600 text-white text-sm sm:text-base rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUpdateProduct}
-                  className="flex-1 px-4 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors font-semibold"
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white text-sm sm:text-base rounded-lg transition-colors"
                 >
                   Save Changes
                 </button>

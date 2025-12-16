@@ -63,6 +63,7 @@ export interface Product {
   bulkDiscounts: Array<{ minQuantity: number; discount: number }>;
   inStock: boolean;
   stock: number;
+  sortOrder?: number;
   averageRating?: number;
   totalRatings?: number;
   createdBy: string;

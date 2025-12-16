@@ -20,6 +20,7 @@ export interface Product {
   stock: number;
   averageRating?: number;
   totalRatings?: number;
+  sortOrder?: number;
 }
 
 export interface CartItem extends Product {

@@ -23,6 +23,7 @@ interface ProductForm {
   specifications: { key: string; value: string }[];
   bulkDiscounts: { minQuantity: number; discount: number }[];
   stock: number;
+  sortOrder: number;
 }
 
 export const AddProduct = () => {
@@ -49,6 +50,7 @@ export const AddProduct = () => {
     specifications: [],
     bulkDiscounts: [],
     stock: 0,
+    sortOrder: 0,
   });
 
   // Redirect if not admin
@@ -94,6 +96,7 @@ export const AddProduct = () => {
         bulkDiscounts: formData.bulkDiscounts,
         inStock: true,
         stock: formData.stock || 0,
+        sortOrder: formData.sortOrder || 0,
       });
       
       // Clear form on success
@@ -115,6 +118,7 @@ export const AddProduct = () => {
         specifications: [],
         bulkDiscounts: [],
         stock: 0,
+        sortOrder: 0,
       });
 
       toast.success('Product added successfully!');
@@ -383,6 +387,43 @@ export const AddProduct = () => {
                           alt={`Product ${index + 1}`}
                           className="w-full h-32 object-cover rounded-lg border border-cyan-500/30"
                         />
+                        
+                        {/* Reorder buttons */}
+                        <div className="absolute top-2 left-2 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (index === 0) return;
+                              const newImages = [...formData.images];
+                              [newImages[index], newImages[index - 1]] = [newImages[index - 1], newImages[index]];
+                              setFormData({ ...formData, images: newImages });
+                            }}
+                            disabled={index === 0}
+                            className="p-1 bg-slate-700 hover:bg-slate-600 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Move up"
+                          >
+                            <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (index === formData.images.length - 1) return;
+                              const newImages = [...formData.images];
+                              [newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]];
+                              setFormData({ ...formData, images: newImages });
+                            }}
+                            disabled={index === formData.images.length - 1}
+                            className="p-1 bg-slate-700 hover:bg-slate-600 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Move down"
+                          >
+                            <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                        </div>
+                        
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(index)}
@@ -391,12 +432,15 @@ export const AddProduct = () => {
                           <Trash2 className="h-4 w-4" />
                         </button>
                         <div className="absolute bottom-2 left-2 bg-slate-900/80 px-2 py-1 rounded text-xs text-white">
-                          {index + 1}
+                          #{index + 1}
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
+                <p className="text-xs text-gray-400 mt-2">
+                  Use arrows to reorder images. First image will be the main display image.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -564,6 +608,24 @@ export const AddProduct = () => {
                   className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                   placeholder="Enter available quantity"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Display Order
+                </label>
+                <input
+                  type="number"
+                  name="sortOrder"
+                  value={formData.sortOrder}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                  placeholder="0 (lower numbers appear first)"
+                />
+                <p className="text-xs text-gray-400">
+                  Set product display order. Lower numbers show first on homepage.
+                </p>
               </div>
             </div>
           </div>

@@ -42,9 +42,12 @@ export const Home = () => {
         bulkDiscounts: p.bulkDiscounts || [],
         inStock: p.inStock,
         stock: (p as any).stock || 0,
+        sortOrder: (p as any).sortOrder || 0,
         averageRating: p.averageRating,
         totalRatings: p.totalRatings,
       }));
+      
+      // Products are already sorted by backend (sortOrder, then createdAt)
       
       setProducts(convertedProducts);
     } catch (err) {
@@ -126,7 +129,7 @@ export const Home = () => {
 
         {!loading && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

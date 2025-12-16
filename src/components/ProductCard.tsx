@@ -70,7 +70,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <span className="text-xs text-gray-400">{product.height}</span>
         </div>
 
-        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors duration-300">
+        <h3 className="text-sm sm:text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors duration-300 line-clamp-1">
           {product.name}
         </h3>
 
@@ -97,11 +97,11 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-center">
             {user && isAdmin(user.email) ? (
             <button
               onClick={handleViewDetails}
-              className="bg-slate-700 hover:bg-slate-600 text-gray-300 px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-300"
+              className="w-[90%] bg-slate-700 hover:bg-slate-600 text-gray-300 px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300"
             >
               <Eye className="h-4 w-4" />
               <span className="text-sm font-semibold">View</span>
@@ -109,7 +109,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           ) : (
             <button
               onClick={handleAddToCart}
-              className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
+              className="w-[90%] bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
             >
               <ShoppingCart className="h-4 w-4" />
               <span className="text-sm font-semibold">Add</span>
