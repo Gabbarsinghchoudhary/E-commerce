@@ -109,7 +109,34 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur-md border-b border-cyan-500/20">
+    <>
+      {/* Announcement Ticker */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 overflow-hidden">
+        <div className="relative h-8 flex items-center">
+          <div className="animate-marquee whitespace-nowrap flex items-center">
+            <span className="text-white font-semibold text-sm mx-8">🔥 FINAL SEASON-END SALE - Up to 60% OFF</span>
+            <span className="text-white font-semibold text-sm mx-8">⚡ Limited Stock Only</span>
+            <span className="text-white font-semibold text-sm mx-8">🎁 Free Express Shipping on All Orders</span>
+            <span className="text-white font-semibold text-sm mx-8">💳 Pay Online, Get Faster Delivery</span>
+            <span className="text-white font-semibold text-sm mx-8">🔥 FINAL SEASON-END SALE - Up to 60% OFF</span>
+            <span className="text-white font-semibold text-sm mx-8">⚡ Limited Stock Only</span>
+            <span className="text-white font-semibold text-sm mx-8">🎁 Free Express Shipping on All Orders</span>
+            <span className="text-white font-semibold text-sm mx-8">💳 Pay Online, Get Faster Delivery</span>
+          </div>
+          <div className="animate-marquee2 whitespace-nowrap flex items-center absolute">
+            <span className="text-white font-semibold text-sm mx-8">🔥 FINAL SEASON-END SALE - Up to 60% OFF</span>
+            <span className="text-white font-semibold text-sm mx-8">⚡ Limited Stock Only</span>
+            <span className="text-white font-semibold text-sm mx-8">🎁 Free Express Shipping on All Orders</span>
+            <span className="text-white font-semibold text-sm mx-8">💳 Pay Online, Get Faster Delivery</span>
+            <span className="text-white font-semibold text-sm mx-8">🔥 FINAL SEASON-END SALE - Up to 60% OFF</span>
+            <span className="text-white font-semibold text-sm mx-8">⚡ Limited Stock Only</span>
+            <span className="text-white font-semibold text-sm mx-8">🎁 Free Express Shipping on All Orders</span>
+            <span className="text-white font-semibold text-sm mx-8">💳 Pay Online, Get Faster Delivery</span>
+          </div>
+        </div>
+      </div>
+      
+      <nav className="fixed top-8 left-0 right-0 z-50 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur-md border-b border-cyan-500/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           
@@ -274,7 +301,7 @@ export const Navbar: React.FC = () => {
 
           {/* MOBILE MENU DROPDOWN */}
           {isMobile && isHamburgerOpen && (
-            <div className="fixed top-16 right-4 bg-slate-800 border border-cyan-500/20 rounded-lg shadow-lg py-2 px-4 z-50 w-48">
+            <div className="fixed top-24 right-4 bg-slate-800 border border-cyan-500/20 rounded-lg shadow-lg py-2 px-4 z-50 w-48">
               <Link
                 to="/"
                 className="block px-4 py-2 text-gray-300 hover:bg-slate-700 hover:text-cyan-400 rounded"
@@ -296,5 +323,6 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
     </nav>
+    </>
   );
 };

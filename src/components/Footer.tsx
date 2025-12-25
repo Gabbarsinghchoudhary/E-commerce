@@ -118,6 +118,15 @@ export const Footer = () => {
               Cancel Order
             </Link>
           </div>
+          <div className="flex flex-col items-center mb-4">
+            <p className="text-center text-gray-400 text-sm mb-2">Secure Payment Methods</p>
+            <div className="flex items-center justify-center gap-6">
+              <i className="fab fa-cc-visa text-2xl text-cyan-400 hover:text-cyan-300 transition-colors"></i>
+              <i className="fa-brands fa-paypal text-2xl text-blue-400 hover:text-blue-300 transition-colors"></i>
+              <i className="fa-brands fa-cc-mastercard text-2xl text-orange-400 hover:text-orange-300 transition-colors"></i>
+              <i className="fa-brands fa-google-pay text-2xl text-green-400 hover:text-green-300 transition-colors"></i>
+            </div>
+          </div>
           <p className="text-center text-sm">&copy; {new Date().getFullYear()} DecorMitra. All rights reserved.</p>
         </div>
       </div>

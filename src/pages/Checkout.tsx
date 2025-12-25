@@ -58,9 +58,15 @@ export const Checkout = () => {
     }, 0);
   };
 
-  // Calculate grand total
+  // Calculate grand total (before online discount)
   const getGrandTotal = () => {
     return getTotalPriceForCheckout();
+  };
+
+  // Calculate online payment total (₹50 OFF)
+  const getOnlinePaymentTotal = () => {
+    const total = getGrandTotal();
+    return total > 50 ? total - 50 : 0;
   };
 
   useEffect(() => {
@@ -73,9 +79,14 @@ export const Checkout = () => {
     fullName: '',
     email: '',
     phone: '',
-    address: '',
+    houseNo: '',
+    roadArea: '',
+    landmark: '',
+    address: '', // Will be composed for backend
     city: '',
+    state: '',
     zipCode: '',
+    fullAddress: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,16 +96,22 @@ export const Checkout = () => {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Online payment handler (Razorpay)
+  const handleOnlinePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
 
     try {
-      const grandTotal = getGrandTotal();
-      
+      const onlineTotal = getOnlinePaymentTotal();
+
+      // Compose full address for backend (if fullAddress provided, use it, else compose)
+      const composedAddress = formData.fullAddress.trim()
+        ? formData.fullAddress.trim()
+        : `${formData.houseNo}, ${formData.roadArea}, ${formData.city}, ${formData.state} - ${formData.zipCode}${formData.landmark ? ', Landmark: ' + formData.landmark : ''}`;
+
       // Create Razorpay order
-      const paymentOrderResponse = await paymentAPI.createRazorpayOrder(grandTotal);
-      
+      const paymentOrderResponse = await paymentAPI.createRazorpayOrder(onlineTotal);
+
       // Initialize Razorpay checkout
       const options = {
         key: paymentOrderResponse.keyId,
@@ -117,29 +134,34 @@ export const Checkout = () => {
               items: checkoutItems.map(item => ({
                 product: item.id,
                 productName: item.name,
-                // Remove productPrice - let backend calculate it for security
                 quantity: item.quantity,
               })),
               shippingAddress: {
                 fullName: formData.fullName,
                 email: formData.email,
                 phone: formData.phone,
-                address: formData.address,
+                houseNo: formData.houseNo,
+                roadArea: formData.roadArea,
+                landmark: formData.landmark,
                 city: formData.city,
+                state: formData.state,
                 zipCode: formData.zipCode,
+                address: composedAddress,
+                fullAddress: formData.fullAddress,
               },
               paymentInfo: {},
               razorpayPaymentId: response.razorpay_payment_id,
               razorpayOrderId: response.razorpay_order_id,
               razorpaySignature: response.razorpay_signature,
+              paymentType: 'Online',
+              onlineDiscount: 50,
             };
 
             const orderResponse = await orderAPI.createOrder(orderData);
-            
+
             setIsComplete(true);
             setOrderId(orderResponse.order.orderId);
-            
-            // Reload cart to reflect cleared items (only if not buy now)
+
             if (!isBuyNow) {
               await loadCart();
             }
@@ -171,6 +193,52 @@ export const Checkout = () => {
       rzp.open();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to initialize payment');
+      setIsProcessing(false);
+    }
+  };
+
+  // Cash on Delivery handler
+  const handleCOD = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    try {
+      const grandTotal = getGrandTotal();
+      const composedAddress = formData.fullAddress.trim()
+        ? formData.fullAddress.trim()
+        : `${formData.houseNo}, ${formData.roadArea}, ${formData.city}, ${formData.state} - ${formData.zipCode}${formData.landmark ? ', Landmark: ' + formData.landmark : ''}`;
+      const orderData = {
+        items: checkoutItems.map(item => ({
+          product: item.id,
+          productName: item.name,
+          quantity: item.quantity,
+        })),
+        shippingAddress: {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          houseNo: formData.houseNo,
+          roadArea: formData.roadArea,
+          landmark: formData.landmark,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          address: composedAddress,
+          fullAddress: formData.fullAddress,
+        },
+        paymentInfo: {},
+        paymentType: 'COD',
+      };
+      const orderResponse = await orderAPI.createOrder(orderData);
+      setIsComplete(true);
+      setOrderId(orderResponse.order.orderId);
+      if (!isBuyNow) {
+        await loadCart();
+      }
+      setTimeout(() => {
+        navigate('/track-order');
+      }, 3000);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to place order');
       setIsProcessing(false);
     }
   };
@@ -228,7 +296,7 @@ export const Checkout = () => {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form className="space-y-6">
               <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-cyan-500/20 p-6">
                 <h2 className="text-xl font-bold text-white mb-4">Shipping Information</h2>
                 <div className="space-y-4">
@@ -280,16 +348,59 @@ export const Checkout = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Full Address *
+                      House No. / Flat No. / Building *
                     </label>
                     <input
                       type="text"
-                      name="address"
-                      value={formData.address}
+                      name="houseNo"
+                      value={formData.houseNo}
                       onChange={handleInputChange}
                       required
                       className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                      placeholder="123 Main St"
+                      placeholder="A-101, Green Apartments"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Full Address (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      name="fullAddress"
+                      value={formData.fullAddress}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                      placeholder="Enter complete address if different from above"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Road / Colony / Area *
+                    </label>
+                    <input
+                      type="text"
+                      name="roadArea"
+                      value={formData.roadArea}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                      placeholder="MG Road, Sector 21"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Landmark (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      name="landmark"
+                      value={formData.landmark}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                      placeholder="Near City Mall"
                     />
                   </div>
 
@@ -305,24 +416,39 @@ export const Checkout = () => {
                         onChange={handleInputChange}
                         required
                         className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                        placeholder="New York"
+                        placeholder="Delhi"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        PIN Code
+                        State
                       </label>
                       <input
                         type="text"
-                        name="zipCode"
-                        value={formData.zipCode}
+                        name="state"
+                        value={formData.state}
                         onChange={handleInputChange}
                         required
                         className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                        placeholder="10001"
+                        placeholder="Maharashtra"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      PIN Code
+                    </label>
+                    <input
+                      type="text"
+                      name="zipCode"
+                      value={formData.zipCode}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                      placeholder="10001"
+                    />
                   </div>
                 </div>
               </div>
@@ -344,9 +470,10 @@ export const Checkout = () => {
               </div>
 
               <button
-                type="submit"
+                type="button"
+                onClick={handleOnlinePayment}
                 disabled={isProcessing}
-                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-4 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-4 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mb-3"
               >
                 {isProcessing ? (
                   <>
@@ -356,7 +483,25 @@ export const Checkout = () => {
                 ) : (
                   <>
                     <Lock className="h-5 w-5" />
-                    <span>Pay ₹ {getGrandTotal().toFixed(2)}</span>
+                    <span>Pay ₹ {getOnlinePaymentTotal().toFixed(2)} (Online - ₹50 OFF)</span>
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={handleCOD}
+                disabled={isProcessing}
+                className="w-full bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-gray-900 text-white font-semibold py-4 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 hover:shadow-lg hover:shadow-gray-500/50 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-5 w-5" />
+                    <span>Cash on Delivery (₹{getGrandTotal().toFixed(2)})</span>
                   </>
                 )}
               </button>
@@ -365,9 +510,9 @@ export const Checkout = () => {
 
           <div className="lg:col-span-1">
             <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-cyan-500/20 p-6 sticky top-24">
-              <h2 className="text-xl font-bold text-white mb-4">Order Summary</h2>
+              <h2 className="text-xl font-bold text-white mb-6">Order Summary</h2>
 
-              <div className="space-y-3 mb-6">
+              <div className="space-y-4 mb-6">
                 {checkoutItems.map((item) => {
                   const pricePerItem = getBulkDiscountPriceForCheckout(item);
                   const totalItemPrice = pricePerItem * item.quantity;
@@ -375,10 +520,15 @@ export const Checkout = () => {
                   const applicableBulk = bulkDiscounts
                     .filter((bulk: any) => item.quantity >= bulk.minQuantity)
                     .sort((a: any, b: any) => b.discount - a.discount)[0];
-
+                  // Homepage discount (if any)
+                  const homepageDiscount = item.discountedPrice && item.price
+                    ? ((item.price - item.discountedPrice) / item.price) * 100
+                    : 0;
+                  // Total discount: homepage + bulk
+                  const totalDiscount = homepageDiscount + (applicableBulk ? applicableBulk.discount : 0);
                   return (
                     <div key={item.id} className="space-y-1">
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between items-center text-sm">
                         <span className="text-gray-300">
                           {item.name} x {item.quantity}
                         </span>
@@ -387,15 +537,15 @@ export const Checkout = () => {
                             ₹ {totalItemPrice.toFixed(2)}
                           </span>
                           {applicableBulk && (
-                            <span className="text-xs font-bold text-green-400 bg-green-500/20 px-2 py-0.5 rounded">
-                              -{applicableBulk.discount}%
+                            <span className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                              {totalDiscount.toFixed(0)}% OFF
                             </span>
                           )}
                         </div>
                       </div>
                       {applicableBulk && (
                         <p className="text-xs text-green-400">
-                          Bulk discount applied: ₹{pricePerItem.toFixed(2)} each
+                          You saved with more piece pricing: ₹{pricePerItem.toFixed(2)} each
                         </p>
                       )}
                     </div>

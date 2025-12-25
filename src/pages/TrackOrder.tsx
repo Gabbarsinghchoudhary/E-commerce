@@ -159,14 +159,16 @@ export const TrackOrder = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-20 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            {user?.isAdmin ? 'Track All Orders' : 'Track Your Order'}
-          </h1>
-          <p className="text-gray-400">
-            {user?.isAdmin ? 'View and manage all customer orders' : 'Enter your order ID to track your package'}
-          </p>
-        </div>
+        {!orderDetails && (
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-white mb-4">
+              {user?.isAdmin ? 'Track All Orders' : 'Track Your Order'}
+            </h1>
+            <p className="text-gray-400">
+              {user?.isAdmin ? 'View and manage all customer orders' : 'Enter your order ID to track your package'}
+            </p>
+          </div>
+        )}
 
         {/* Admin View: All Orders List */}
         {user?.isAdmin ? (
@@ -204,7 +206,7 @@ export const TrackOrder = () => {
                             {order.items.map((item, idx) => (
                               <div key={idx} className="flex justify-between py-1">
                                 <span>{item.productName} x {item.quantity}</span>
-                                <span className="text-cyan-400">₹{(item.productPrice * item.quantity).toFixed(2)}</span>
+                                <span className="text-cyan-400">₹{((item.productPrice || 0) * item.quantity).toFixed(2)}</span>
                               </div>
                             ))}
                             <div className="flex justify-between pt-2 mt-2 border-t border-cyan-500/10 font-semibold text-white">
@@ -268,7 +270,11 @@ export const TrackOrder = () => {
                             <input
                               type="text"
                               value={statusUpdate.location}
-                              onChange={(e) => setStatusUpdate({ ...statusUpdate, location: e.target.value })}
+                              onChange={(e) => setStatusUpdate({ 
+                                ...statusUpdate, 
+                                location: e.target.value,
+                                currentLocation: e.target.value 
+                              })}
                               placeholder="e.g., Mumbai Warehouse"
                               className="w-full px-4 py-2 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-white"
                             />
@@ -340,13 +346,14 @@ export const TrackOrder = () => {
                       <button
                         onClick={() => {
                           setEditingOrder(order._id);
+                          const currentLoc = order.trackingDetails?.currentLocation || '';
                           setStatusUpdate({
                             status: order.status,
                             description: '',
-                            location: order.trackingDetails?.currentLocation || '',
+                            location: currentLoc,
                             carrier: order.trackingDetails?.carrier || '',
                             trackingNumber: order.trackingDetails?.trackingNumber || '',
-                            currentLocation: order.trackingDetails?.currentLocation || '',
+                            currentLocation: currentLoc,
                             estimatedDelivery: order.trackingDetails?.estimatedDelivery || '',
                           });
                         }}
@@ -551,7 +558,7 @@ export const TrackOrder = () => {
                   <div className="space-y-1">
                     {order.items.map((item, idx) => (
                       <p key={idx} className="text-gray-400 text-xs">
-                        {item.productName} x {item.quantity} - ₹{(item.productPrice * item.quantity).toFixed(2)}
+                        {item.productName} x {item.quantity} - ₹{((item.productPrice || 0) * item.quantity).toFixed(2)}
                       </p>
                     ))}
                     <p className="text-sm font-semibold text-cyan-400 pt-2 border-t border-cyan-500/10">

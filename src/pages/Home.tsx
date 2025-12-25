@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Zap, Star, TrendingUp, Sparkles, Shield, Truck, HeadphonesIcon, Award } from 'lucide-react';
+import { Zap, Star, TrendingUp, Sparkles, Truck, CreditCard, RefreshCw, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ProductCard } from '../components/ProductCard';
 import { productAPI, Product as APIProduct, handleAPIError } from '../services/api';
@@ -20,7 +20,7 @@ export const Home = () => {
     try {
       setLoading(true);
       const response = await productAPI.getAllProducts();
-      
+
       // Convert backend products to frontend format
       const convertedProducts: Product[] = response.products.map((p: APIProduct) => ({
         id: p._id,
@@ -46,9 +46,9 @@ export const Home = () => {
         averageRating: p.averageRating,
         totalRatings: p.totalRatings,
       }));
-      
+
       // Products are already sorted by backend (sortOrder, then createdAt)
-      
+
       setProducts(convertedProducts);
     } catch (err) {
       const errorMessage = handleAPIError(err);
@@ -63,7 +63,7 @@ export const Home = () => {
     : products.filter((p) => p.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-20 pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-28 pb-12">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute top-60 right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -71,52 +71,31 @@ export const Home = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-16">
-          <div className="flex justify-center items-center space-x-2 mb-4">
-            <Sparkles className="h-8 w-8 text-cyan-400 animate-pulse" />
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
-              Illuminate Your Future
+        {/* Promotional Banner */}
+        <div className="mb-12 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 rounded-2xl p-8 text-center relative overflow-hidden shadow-2xl" style={{ position: 'relative' }}>
+          <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 via-orange-500/20 to-amber-500/20 backdrop-blur-sm"></div>
+            <img
+              src="images/promo.webp"
+              alt="Decorative background"
+              className="absolute inset-0 w-full h-full object-cover object-center z-0"
+              style={{ borderRadius: '1rem', pointerEvents: 'none' }}
+            />
+          <div className="relative z-10">
+            <div className="inline-block bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 px-4 py-1 rounded-full mb-4 shadow-lg">
+              <span className="text-black text-sm font-bold uppercase tracking-wider drop-shadow">Limited Time Only</span>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-4 animate-pulse bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 bg-clip-text text-transparent drop-shadow-lg">
+              FINAL SEASON-END SALE
             </h1>
-            <Sparkles className="h-8 w-8 text-purple-400 animate-pulse" />
-          </div>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Experience the next generation of smart lighting technology
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/20">
-            <Zap className="h-12 w-12 text-cyan-400 mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">Energy Efficient</h3>
-            <p className="text-gray-400">Save up to 80% on energy costs</p>
-          </div>
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-blue-500/20 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/20">
-            <Star className="h-12 w-12 text-blue-400 mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">Smart Control</h3>
-            <p className="text-gray-400">Control from anywhere, anytime</p>
-          </div>
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/20">
-            <TrendingUp className="h-12 w-12 text-purple-400 mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">Long Lasting</h3>
-            <p className="text-gray-400">Up to 50,000 hours lifespan</p>
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-3 justify-center">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
-                  selectedCategory === category
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/50'
-                    : 'bg-slate-800 text-gray-400 hover:text-white hover:bg-slate-700 border border-cyan-500/20'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+            <p className="text-2xl md:text-3xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 px-3 py-1 rounded-lg text-black shadow-lg">up to <span className="text-5xl md:text-6xl font-extrabold">60% OFF</span></span>
+            </p>
+            <p className="text-xl md:text-2xl font-semibold mb-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 px-3 py-1 rounded-lg text-black shadow-lg inline-block">
+              Limited Stock Only
+            </p>
+            <p className="text-lg md:text-xl italic bg-black/70 text-yellow-300 px-3 py-1 rounded-lg mt-2 inline-block shadow-lg">
+              Once it's gone, it's gone.
+            </p>
           </div>
         </div>
 
@@ -157,41 +136,175 @@ export const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-8 rounded-2xl border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/20 hover:-translate-y-2">
               <div className="bg-cyan-500/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                <Shield className="h-8 w-8 text-cyan-400" />
+                <Truck className="h-8 w-8 text-cyan-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Quality Guarantee</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Free Express Shipping</h3>
               <p className="text-gray-400">
-                All products come with manufacturer warranty and quality assurance
+                Fast Pan-India delivery in 5 – 7 working days with tracking.
               </p>
             </div>
 
             <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-8 rounded-2xl border border-blue-500/20 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/20 hover:-translate-y-2">
               <div className="bg-blue-500/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                <Truck className="h-8 w-8 text-blue-400" />
+                <CreditCard className="h-8 w-8 text-blue-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Fast Delivery</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Pay Online, Get Faster Delivery</h3>
               <p className="text-gray-400">
-                Free shipping on all orders with quick and reliable delivery
+                Secure payments with UPI & Cards. Priority processing on prepaid orders.
               </p>
             </div>
 
             <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-8 rounded-2xl border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2">
               <div className="bg-purple-500/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                <HeadphonesIcon className="h-8 w-8 text-purple-400" />
+                <RefreshCw className="h-8 w-8 text-purple-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">24/7 Support</h3>
+              <h3 className="text-xl font-bold text-white mb-3">7-Day Easy Replacement</h3>
               <p className="text-gray-400">
-                Our customer service team is always ready to help you
+                Received damaged? We replace it—no questions asked.
               </p>
             </div>
 
             <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-8 rounded-2xl border border-green-500/20 hover:border-green-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/20 hover:-translate-y-2">
               <div className="bg-green-500/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                <Award className="h-8 w-8 text-green-400" />
+                <MessageCircle className="h-8 w-8 text-green-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Best Prices</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Always-On WhatsApp Support</h3>
               <p className="text-gray-400">
-                Competitive pricing with regular discounts and special offers
+                Real support, real people. We're here 24/7.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Customer Testimonials Section */}
+        <div className="mt-20 mb-12">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent mb-4">
+              What our customers say about us…
+            </h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              Real experiences from real customers who trust DecorMitra for their lighting needs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Testimonial 1 */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-6 rounded-2xl border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/20 hover:-translate-y-2">
+              <div className="flex items-center mb-4">
+                <div className="bg-gradient-to-r from-cyan-500 to-blue-500 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  R
+                </div>
+                <div className="ml-3">
+                  <h4 className="text-white font-semibold">Rajesh Kumar</h4>
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-300 leading-relaxed italic">
+                "Excellent quality! The RGB lamp exceeded my expectations. Fast delivery and great customer service. Highly recommend DecorMitra for home décor!"
+              </p>
+            </div>
+
+            {/* Testimonial 2 */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-6 rounded-2xl border border-blue-500/20 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/20 hover:-translate-y-2">
+              <div className="flex items-center mb-4">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-500 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  P
+                </div>
+                <div className="ml-3">
+                  <h4 className="text-white font-semibold">Priya Sharma</h4>
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-300 leading-relaxed italic">
+                "Beautiful products and amazing packaging! The smart lamp features are incredible. Love the touch control and multiple light modes. Worth every penny!"
+              </p>
+            </div>
+
+            {/* Testimonial 3 */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-6 rounded-2xl border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2">
+              <div className="flex items-center mb-4">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  A
+                </div>
+                <div className="ml-3">
+                  <h4 className="text-white font-semibold">Amit Patel</h4>
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-300 leading-relaxed italic">
+                "Fantastic experience! Quick delivery, excellent quality, and the WhatsApp support team was very helpful. The discounts made it even better!"
+              </p>
+            </div>
+
+            {/* Testimonial 4 */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-6 rounded-2xl border border-green-500/20 hover:border-green-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/20 hover:-translate-y-2">
+              <div className="flex items-center mb-4">
+                <div className="bg-gradient-to-r from-green-500 to-teal-500 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  S
+                </div>
+                <div className="ml-3">
+                  <h4 className="text-white font-semibold">Sneha Verma</h4>
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-300 leading-relaxed italic">
+                "Transformed my living room! The energy-efficient lamps are perfect. Great quality at affordable prices. Will definitely order again!"
+              </p>
+            </div>
+
+            {/* Testimonial 5 */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-6 rounded-2xl border border-orange-500/20 hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 hover:-translate-y-2">
+              <div className="flex items-center mb-4">
+                <div className="bg-gradient-to-r from-orange-500 to-red-500 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  V
+                </div>
+                <div className="ml-3">
+                  <h4 className="text-white font-semibold">Vikram Singh</h4>
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-300 leading-relaxed italic">
+                "Professional service and premium quality products. The bulk discount offer was perfect for my office setup. Highly satisfied customer!"
+              </p>
+            </div>
+
+            {/* Testimonial 6 */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-6 rounded-2xl border border-pink-500/20 hover:border-pink-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/20 hover:-translate-y-2">
+              <div className="flex items-center mb-4">
+                <div className="bg-gradient-to-r from-pink-500 to-rose-500 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  M
+                </div>
+                <div className="ml-3">
+                  <h4 className="text-white font-semibold">Meera Joshi</h4>
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-300 leading-relaxed italic">
+                "Simply amazing! The lamps are beautiful and functional. Free shipping and easy replacement policy made shopping stress-free. Thank you DecorMitra!"
               </p>
             </div>
           </div>

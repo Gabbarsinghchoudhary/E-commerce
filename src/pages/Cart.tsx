@@ -100,10 +100,17 @@ export const Cart = () => {
                       <div className="text-right">
                         {(() => {
                           const bulkDiscount = getApplicableBulkDiscount(item);
+                          // Homepage discount (if any)
+                          const homepageDiscount = item.discountedPrice && item.price
+                            ? ((item.price - item.discountedPrice) / item.price) * 100
+                            : 0;
+                          // Total discount: homepage + bulk
+                          const totalDiscount = homepageDiscount + (bulkDiscount ? bulkDiscount.discount : 0);
+                          // Base price is item.price
+                          const afterHomepage = item.discountedPrice || item.price;
                           const pricePerItem = getBulkDiscountPrice(item);
-                          const originalPrice = (item as any).discountedPrice || item.price;
                           const totalPrice = pricePerItem * item.quantity;
-
+                          const originalPrice = item.price;
                           return (
                             <>
                               <div className="flex items-center justify-end space-x-2 mb-1">
@@ -111,16 +118,16 @@ export const Cart = () => {
                                   ₹ {totalPrice.toFixed(2)}
                                 </p>
                                 {bulkDiscount && (
-                                  <span className="text-xs font-bold text-green-400 bg-green-500/20 px-2 py-1 rounded">
-                                    Bulk -{bulkDiscount.discount}%
+                                  <span className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                    {totalDiscount.toFixed(0)}% OFF
                                   </span>
                                 )}
                               </div>
                               <p className="text-sm text-gray-400">
                                 ₹ {pricePerItem.toFixed(2)} each
                                 {bulkDiscount && (
-                                  <span className="ml-2 text-green-400">
-                                    (was ₹{originalPrice.toFixed(2)})
+                                  <span className="ml-2 text-orange-400 line-through">
+                                    (was ₹{(originalPrice).toFixed(2)})
                                   </span>
                                 )}
                               </p>

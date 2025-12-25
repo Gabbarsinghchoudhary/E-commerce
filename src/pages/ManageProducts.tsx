@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Eye, Package, AlertTriangle, Edit, X, Plus } from 'lucide-react';
+import { Trash2, Eye, Package, AlertTriangle, Edit, X, Plus, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { productAPI, Product as APIProduct, handleAPIError } from '../services/api';
@@ -192,6 +192,14 @@ export const ManageProducts = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-20 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center space-x-2 text-cyan-400 hover:text-cyan-300 mb-8 transition-colors duration-300"
+        >
+          <ArrowLeft className="h-5 w-5" />
+          <span>Back to Home</span>
+        </button>
+
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">
             <Package className="h-8 w-8 text-cyan-400" />

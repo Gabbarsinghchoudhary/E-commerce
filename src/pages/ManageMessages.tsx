@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, X, Calendar, User, CheckCircle, Clock } from 'lucide-react';
+import { Mail, X, Calendar, User, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { contactAPI } from '../services/api';
@@ -58,15 +58,16 @@ export const ManageMessages = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-20 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center space-x-2 text-cyan-400 hover:text-cyan-300 mb-8 transition-colors duration-300"
+        >
+          <ArrowLeft className="h-5 w-5" />
+          <span>Back to Home</span>
+        </button>
+
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold text-white">Contact Messages</h1>
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center space-x-2 text-gray-400 hover:text-cyan-400 transition-colors"
-          >
-            <X className="h-5 w-5" />
-            <span>Close</span>
-          </button>
         </div>
 
         {loading ? (

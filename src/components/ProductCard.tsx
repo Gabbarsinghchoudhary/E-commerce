@@ -50,9 +50,11 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-60"></div>
 
-        <div className="absolute top-4 right-4 bg-cyan-500/90 backdrop-blur-sm px-3 py-1 rounded-full">
-          <span className="text-xs font-bold text-white">{product.category}</span>
-        </div>
+        {hasDiscount && (
+          <div className="absolute top-4 right-4 bg-gradient-to-br from-red-500 to-orange-500 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg">
+            <span className="text-sm font-bold text-white">{discountPercentage}% OFF</span>
+          </div>
+        )}
 
         <button
           onClick={handleViewDetails}
@@ -85,14 +87,9 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 Rs {displayPrice}
               </span>
               {hasDiscount && (
-                <>
-                  <span className="text-base font-semibold text-gray-400 line-through">
-                    Rs {product.price}
-                  </span>
-                  <span className="text-xs font-bold text-green-400 bg-green-500/20 px-2 py-1 rounded">
-                    {discountPercentage}% OFF
-                  </span>
-                </>
+                <span className="text-base font-semibold text-gray-400 line-through">
+                  Rs {product.price}
+                </span>
               )}
             </div>
           </div>
